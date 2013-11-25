@@ -24,23 +24,43 @@ class Graph:
         self.nodes[node.UID] = node
         self.relationships[node.UID] = [[],[]]
 
-    def removeNode(self, node):
-        for outgoingrelation in relationships[node.UID][0]:
-            removeRelationship(node.UID, outgoingrelation)
+    #takes the ID of a node to remove
+    def removeNode(self, nodeID):
+        if not nodeID in self.nodes:
+            print "TRIED TO REMOVE NODE", nodeID, "WHICH DIDN'T EXIST."
+            return
+        
+        for outgoingrelation in self.relationships[nodeID][0]:
+            self.removeRelationship(nodeID, outgoingrelation)
             #relationships[outgoingrelation][1].remove(node.UID)
 
-        for incomingrelation in relationships[node.UID][1]:
-            removeRelationship(incomingrelation, node.UID)
+        for incomingrelation in self.relationships[nodeID][1]:
+            self.removeRelationship(incomingrelation, nodeID)
             #relationships[incomingrelation][0].remove(node.UID)
 
-        del self.relationships[node.UID]
-        del self.nodes[node.UID]
+        del self.relationships[nodeID]
+        del self.nodes[nodeID]
 
+    #takes the IDs of the outgoing and imconing nodes
     def removeRelationship(self, outgoing, incoming):
-        self.relationships[outgoing].remove(incoming)
-        self.relationships[incoming].remove(outgoing)
+        if (not outgoing in self.relationships):
+            print "TRIED TO REMOVE RELATIONSHIP", outgoing, " > ", incoming, "WHEN OUTGOING DIDN'T EXIST."
+            return
+        if (not incoming in self.relationships):
+            print "TRIED TO REMOVE RELATIONSHIP", outgoing, " > ", incoming, "WHEN INCOMING DIDN'T EXIST."
+            return
+        
+        self.relationships[outgoing][0].remove(incoming)
+        self.relationships[incoming][1].remove(outgoing)
 
     def addRelationship(self, outgoing, incoming):
+        if (not outgoing in self.relationships):
+            print "TRIED TO ADD RELATIONSHIP", outgoing, " > ", incoming, "WHEN OUTGOING DIDN'T EXIST."
+            return
+        if (not incoming in self.relationships):
+            print "TRIED TO ADD RELATIONSHIP", outgoing, " > ", incoming, "WHEN INCOMING DIDN'T EXIST."
+            return
+        
         self.relationships[outgoing][0] = self.relationships[outgoing][0] + [incoming]
         self.relationships[incoming][1] = self.relationships[incoming][1] + [outgoing]
 

@@ -12,35 +12,26 @@ import Node
 import pygame
 from pygame.locals import *
 import time
-
+import random
 
 g = Graph.Graph()
-n = Node.Node("UID1")
-#n.static = True
-n.position = (300, 300)
 
+totalnodes = 7
 
-n2 = Node.Node("UID2")
-n2.position = (10, 10)
+for i in range(1, totalnodes):
+    numberofconnections = random.randint(1, 4)
+    if numberofconnections >= i:
+        numberofconnections = 0
 
-n3 = Node.Node("UID3")
-n3.position = (20, 40)
+    g.addNode(Node.Node(str(i), position = (random.randint(1, 600), random.randint(1, 600))))
 
-g.addNode(n)
-g.addNode(n2)
-g.addNode(n3)
-g.addRelationship("UID1", "UID2")
-g.addRelationship("UID1", "UID3")
-
-for i in range(4, 20):
-    n = Node.Node(str(i))
-    n.position = (100 + i*2, 100 + i*3)
-    g.addNode(n)
-    if i % 2 == 0:
-        g.addRelationship(n.UID, "UID1")
-    if i % 3 == 0:
-        g.addRelationship(str(i-1), n.UID)
-        g.addRelationship(str(i-2), n.UID)
+    if not i<=2:
+        relationslist = []
+        for j in range(0, numberofconnections):
+            relation = random.choice(range(1, i-1))
+            if not relation in relationslist:
+                g.addRelationship(str(i), str(relation))
+                relationslist = relationslist + [relation]
     
 
 pygame.init()
@@ -55,11 +46,27 @@ background.fill((20, 20, 20))
 screen.blit(background, (0, 0))
 pygame.display.flip()
 
-    # Event loop
+
 while 1:
     for event in pygame.event.get():
         if event.type == QUIT:
-            print "QUIT"   
+            print "QUIT"
+        elif event.type == pygame.KEYDOWN:
+            numberofconnections = random.randint(1, 4)
+            if numberofconnections >= totalnodes:
+                numberofconnections= 0
+
+            g.addNode(Node.Node(str(totalnodes), position = (random.randint(1, 600), random.randint(1, 600))))
+
+            relationslist = []
+            if numberofconnections != 0:
+                for j in range(0, numberofconnections):
+                    relation = random.choice(range(1, totalnodes-2))
+                    if not relation in relationslist:
+                        g.addRelationship(str(totalnodes), str(relation))
+                        relationslist = relationslist + [relation]
+
+            totalnodes = totalnodes + 1
 
     screen.blit(background, (0, 0))
 

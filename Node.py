@@ -5,27 +5,32 @@ import math
 #it calculates all forces that would act upon itself, never forces that would act upon another node.
 
 
-attractiveForceConstant = 1000
-repulsiveForceConstant = 100000
+attractiveForceConstant = 6000
+repulsiveForceConstant = 1000000
+minSpringSize = 65
 frictionCoefficient = 0.95
 
 #def finds the distance as a scalar (the hypot of the x and y positions
 def findDistance(node1, node2):
-    return math.hypot((node1.position[0] - node2.position[0]), (node1.position[1] - node2.position[1]))
+    d = math.hypot((node2.position[0] - node1.position[0]), (node2.position[1] - node1.position[1]))
+    if d<5: #this prevents the distance being tiny and the nodes flying off in to infinity
+        d = 5
+    return d
 
 def findDistanceTuple(node1, node2):
-    return (node2.position[0]-node1.position[0], node2.position[1]-node1.position[1])
+    return (node2.position[0]-node1.position[0]+0.01, node2.position[1]-node1.position[1]+0.01)
 
 def findAngle(node1, node2):
-    pass
+    distanceTuple = findDistanceTuple(node1, node2)
+    return math.atan2(distanceTuple[1], distanceTuple[0])
 
 class Node:
 
     UID = ""
     
-    position = (0, 0)
-    velocity = (0, 0)
-    acceleration = (0, 0)
+    position = (0.0, 0.0)
+    velocity = (0.0, 0.0)
+    acceleration = (0.0, 0.0)
     
     mass = 1.0
     static = False
@@ -33,7 +38,7 @@ class Node:
 
     boundingbox = ((-5, -5), (5, 5))
 
-    def __init__(self, uid, position = (0, 0), velocity = (0, 0), mass = 1, static = False, charge = 10, boundingbox = ((-5, -5), (5, 5)), neighbours = []):
+    def __init__(self, uid, position = (0.0, 0.0), velocity = (0.0, 0.0), mass = 1, static = False, charge = 10, boundingbox = ((-5, -5), (5, 5)), neighbours = []):
         self.UID = uid
         self.position = position
         self.velocity = velocity
@@ -50,15 +55,17 @@ class Node:
     #when we say force we are referring to a tuple with x and y values in that order
     #a force represents the actual direction of travel of the node, so we don't need to negate the force before applying it or anything
     def calculateAttractiveForce(self, other):
-        forcex = 0
-        forcey = 0
+        #forcex = 0.0
+        #forcey = 0.0
 
         forcemagnitude = self._calcAttractiveForceMagnitude(other)
-        distance = findDistanceTuple(self, other)
-        distancemagnitude = findDistance(self, other)
+        distanceangle = findAngle(self, other)
 
-        forcex = math.copysign((1.0*distance[1]/distancemagnitude)*forcemagnitude, distance[0])
-        forcey = math.copysign((1.0*distance[0]/distancemagnitude)*forcemagnitude, distance[1])
+        forcex = math.cos(distanceangle) * forcemagnitude
+        forcey = math.sin(distanceangle) * forcemagnitude
+
+        #forcex = math.copysign((1.0*distance[1]/distancemagnitude)*forcemagnitude, distance[0])
+        #forcey = math.copysign((1.0*distance[0]/distancemagnitude)*forcemagnitude, distance[1])
 
         return (forcex, forcey)
         
@@ -66,24 +73,26 @@ class Node:
     #calculates the total value of the attractive force
     def _calcAttractiveForceMagnitude(self, other):
         distance = findDistance(self, other)
-        return attractiveForceConstant * (distance) #we should perhaps add in a minimum string length later on.
+        return attractiveForceConstant * (distance - minSpringSize) #we should perhaps add in a minimum string length later on.
 
     def calculateRepulsiveForce(self, other):
-        forcex = 0
-        forcey = 0
+        #forcex = 0.0
+        #forcey = 0.0
         
         forcemagnitude = self._calcRepulsiveForceMagnitude(other)
-        distance = findDistanceTuple(self, other)
-        distancemagnitude = findDistance(self, other)
-        
-        forcex = -math.copysign((1.0*distance[1]/distancemagnitude)*forcemagnitude, distance[0])
-        forcey = -math.copysign((1.0*distance[0]/distancemagnitude)*forcemagnitude, distance[1])
+        distanceangle = findAngle(self, other)
 
+        forcex = math.cos(distanceangle) * forcemagnitude
+        forcey = math.sin(distanceangle) * forcemagnitude
+        
+        #forcex = -math.copysign((1.0*distance[1]/distancemagnitude)*forcemagnitude, distance[0])
+        #forcey = -math.copysign((1.0*distance[0]/distancemagnitude)*forcemagnitude, distance[1])
+        
         return (forcex, forcey)
 
     def _calcRepulsiveForceMagnitude(self, other):
         distancetuple = findDistanceTuple(self, other)
-        return -repulsiveForceConstant*1.0*(self.charge * other.charge)/(1.0*(distancetuple[0]**2 + distancetuple[1]**2))
+        return -repulsiveForceConstant*1.0*(self.charge * other.charge)/findDistance(self, other)**2#(1.0*(distancetuple[0]**2 + distancetuple[1]**2))
 
     def calculateAttractiveForces(self, nodeslist):
         return map(self.calculateAttractiveForce, nodeslist)
