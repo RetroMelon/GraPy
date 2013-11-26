@@ -13,92 +13,102 @@ import pygame
 from pygame.locals import *
 import time
 import random
+from threading import Thread
 
 
 class Grapher:
 
     #all draw functions must take a screen, node and camera position (as tuple)
-    def defaultdrawfunction(screen, node):
+    def defaultdrawfunction(self, screen, node, graph, cameraposition):
         pass
 
-    #properties instantiated in constructor are:
-    #graph
-
-    drawFunction = self.defaultdrawfunction
+    graph = None
     
+    drawfunction = None
     size = (600, 600)
 
-    _started = False
+    running = False
+    _quit = False #this can be changed using the stop() function with either another thread or the exit button at the top of the screen. When it does, the while loop in the thread breaks
 
-    def _init_(self, graph = Graph.Graph(), size = (600, 600), drawfunction = defaultdrawfunction):
-        self.graph = graph
+    _thread = None
+
+    _eventslist = []
+
+    def __init__(self, graph = None, size = (600, 600), drawfunction = None):
+        if graph == None:
+            self.graph = Graph.Graph()
+        else:
+            self.graph = graph
+
         self.size = size
+        
+        if drawfunction == None:
+            self.drawfunction = self.defaultdrawfunction
+        else:
+            self.drawfunction = drawfunction
+
+    def setGraph(self, graph):
+        self.graph = graph
+
+    def setDrawFunction(self, drawfunction):
         self.drawfunction = drawfunction
-    
-    def 
-    
 
-pygame.init()
-screen = pygame.display.set_mode((600, 600))
+    def getEvents(self):
+        e = self._eventslist[:]
+        self._eventslist = []
+        return e
+        
+    def start(self):
+        self._thread = Thread(target = self._run)
+        self._thread.start()
 
-background = pygame.Surface(screen.get_size())
-background = background.convert()
-background.fill((20, 20, 20))
+    #the main function which will be run in a separate thread
+    def _run(self):
+        self.running = True
+        pygame.init()
+        screen = pygame.display.set_mode((600, 600))
+
+        background = pygame.Surface(screen.get_size())
+        background = background.convert()
+        background.fill((20, 20, 20))
 
 
-    # Blit everything to the screen
-screen.blit(background, (0, 0))
-pygame.display.flip()
+        # Blit everything to the screen
+        screen.blit(background, (0, 0))
+        pygame.display.flip()
 
+        #the main loop
+        while not self._quit:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    self._quit = True
+                else:
+                    printstring = "EVENT:", event.type
+                    if event.type == pygame.KEYUP or event.type == pygame.KEYDOWN:
+                        printstring = printstring, ",", str(event.key)
+                        self._eventslist = self._eventslist + [printstring]
 
-while 1:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            print "QUIT"
-        elif event.type == pygame.KEYDOWN:
-            numberofconnections = random.randint(1, 4)
-            if numberofconnections >= totalnodes:
-                numberofconnections= 0
+            screen.blit(background, (0, 0))
 
-            g.addNode(Node.Node(str(totalnodes), position = (random.randint(1, 600), random.randint(1, 600))))
+            #drawing the lines
+            for r in self.graph.relationships: #for every key in relationships set
+                for i in self.graph.relationships[r][0]:
+                    start = (self.graph.nodes[r].position)
+                    end = (self.graph.nodes[i].position)
+                    pygame.draw.aaline(
+                                    screen,
+                                    (255, 255, 255),
+                                    start,
+                                    end,
+                                    1)
 
-            relationslist = []
-            if numberofconnections != 0:
-                for j in range(0, numberofconnections):
-                    relation = random.choice(range(1, totalnodes-2))
-                    if not relation in relationslist:
-                        g.addRelationship(str(totalnodes), str(relation))
-                        relationslist = relationslist + [relation]
+			
+            #drawing the nodes
+            for n in self.graph.nodes.values():
+                self.drawfunction(screen, n, self.graph, (0, 0))
 
-            totalnodes = totalnodes + 1
-
-    screen.blit(background, (0, 0))
-
-    #drawing the lines
-    for r in g.relationships: #for every key in relationships set
-        for i in g.relationships[r][0]:
-            start = (g.nodes[r].position)
-            end = (g.nodes[i].position)
-            pygame.draw.aaline(
-                    screen,
-                    (255, 255, 255),
-                    start,
-                    end,
-                    1)
-
-            
-    #drawing the nodes
-    for n in g.nodes.values():
-        intpos = (int(n.position[0]), int(n.position[1]))
-        #print n.UID, intpos
-        pygame.draw.circle(
-                screen, 
-                (0, 255, 255), 
-                intpos,
-                5,
-                0)
-
-    g.doPhysics(1)
-    time.sleep(0.02)
-    
-    pygame.display.flip()
+            self.graph.doPhysics(1)
+            time.sleep(0.02)
+	
+            pygame.display.flip()
+	

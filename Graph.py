@@ -9,6 +9,7 @@ import Node
 
 class Graph:
 
+    #these will be accessed as properties so that we can check if they are locked properly
     nodes = {}
     relationships = {}
 
@@ -17,7 +18,7 @@ class Graph:
     #we need add and remove methods for nodes and relationships
 
     #adds a node to the dictionary. if the node already exists, remove the old one and add this one in place
-    def addNode(self, node):
+    def addNode(self, node):        
         if node.UID in self.nodes:
             self.removeNode(node.UID)
 
@@ -29,6 +30,8 @@ class Graph:
         if not nodeID in self.nodes:
             print "TRIED TO REMOVE NODE", nodeID, "WHICH DIDN'T EXIST."
             return
+
+        #locking the dictionaries so we don't run in to errors
         
         for outgoingrelation in self.relationships[nodeID][0]:
             self.removeRelationship(nodeID, outgoingrelation)
