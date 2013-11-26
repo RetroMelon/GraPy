@@ -14,28 +14,24 @@ from pygame.locals import *
 import time
 import random
 
+g = Graph.Graph()
 
-class Grapher:
+totalnodes = 7
 
-    #all draw functions must take a screen, node and camera position (as tuple)
-    def defaultdrawfunction(screen, node):
-        pass
+for i in range(1, totalnodes):
+    numberofconnections = random.randint(1, 4)
+    if numberofconnections >= i:
+        numberofconnections = 0
 
-    #properties instantiated in constructor are:
-    #graph
+    g.addNode(Node.Node(str(i), position = (random.randint(1, 600), random.randint(1, 600))))
 
-    drawFunction = self.defaultdrawfunction
-    
-    size = (600, 600)
-
-    _started = False
-
-    def _init_(self, graph = Graph.Graph(), size = (600, 600), drawfunction = defaultdrawfunction):
-        self.graph = graph
-        self.size = size
-        self.drawfunction = drawfunction
-    
-    def 
+    if not i<=2:
+        relationslist = []
+        for j in range(0, numberofconnections):
+            relation = random.choice(range(1, i-1))
+            if not relation in relationslist:
+                g.addRelationship(str(i), str(relation))
+                relationslist = relationslist + [relation]
     
 
 pygame.init()
