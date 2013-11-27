@@ -13,7 +13,7 @@ import pygame
 from pygame.locals import *
 import time
 import random
-from threading import Thread
+from threading import *
 
 
 class Grapher:
@@ -31,6 +31,7 @@ class Grapher:
     _quit = False #this can be changed using the stop() function with either another thread or the exit button at the top of the screen. When it does, the while loop in the thread breaks
 
     _thread = None
+    _lock = None
 
     _eventslist = []
 
@@ -46,6 +47,9 @@ class Grapher:
             self.drawfunction = self.defaultdrawfunction
         else:
             self.drawfunction = drawfunction
+
+        self._lock = Lock()
+            
 
     def setGraph(self, graph):
         self.graph = graph
@@ -90,7 +94,9 @@ class Grapher:
 
             screen.blit(background, (0, 0))
 
-            #drawing the lines
+            self._lock.acquire(1)
+
+                #drawing the lines
             for r in self.graph.relationships: #for every key in relationships set
                 for i in self.graph.relationships[r][0]:
                     start = (self.graph.nodes[r].position)
@@ -102,12 +108,14 @@ class Grapher:
                                     end,
                                     1)
 
-			
             #drawing the nodes
             for n in self.graph.nodes.values():
                 self.drawfunction(screen, n, self.graph, (0, 0))
 
             self.graph.doPhysics(1)
+
+            self._lock.release()
+            
             time.sleep(0.02)
 	
             pygame.display.flip()
