@@ -6,6 +6,14 @@ import time
 import pygame
 import math
 
+################################################
+################################################
+#USE PROPERTIES WITHIN GRAPH.PY TO EDIT NODES AND RELATIONSHIPS. IF IT
+#IS OWNED BY A GRAPHER, MAKE A QUEUE OF CHANGES TO BE MADE, AND THEN
+#ONCE THE GRAPHER IS FINISHED, MAKE ALL OF THE CHANGES.
+################################################
+################################################
+
 def drawfunction(screen, node, graph, cameraposition):
     intpos = (int(node.position[0]), int(node.position[1]))
     relationships = len(graph.relationships[node.UID][0]) + len(graph.relationships[node.UID][1])
