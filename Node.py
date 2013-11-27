@@ -6,15 +6,18 @@ import math
 
 
 attractiveForceConstant = 6000
-repulsiveForceConstant = 1000000
+repulsiveForceConstant = 3000000
 minSpringSize = 65
 frictionCoefficient = 0.95
 
 #def finds the distance as a scalar (the hypot of the x and y positions
 def findDistance(node1, node2):
     d = math.hypot((node2.position[0] - node1.position[0]), (node2.position[1] - node1.position[1]))
-    if d<5: #this prevents the distance being tiny and the nodes flying off in to infinity
-        d = 5
+    
+    n = 7.0/(3000000) * repulsiveForceConstant
+
+    if d < n: #this prevents the distance being tiny and the nodes flying off in to infinity
+        d = n
     return d
 
 def findDistanceTuple(node1, node2):

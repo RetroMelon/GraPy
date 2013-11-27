@@ -40,9 +40,10 @@ g.setDrawFunction(drawfunction)
 g.start()
 
 
-
-while True:
-    if len(g.getEvents()) > 0:
+Quit = False
+while not Quit:
+    events = g.getEvents()
+    if len(events) > 0:
         lastnodeadded = lastnodeadded + 1
         graph.addNode(Node.Node(str(lastnodeadded), position = (random.randint(0, 600), random.randint(0, 600))))
         if lastnodeadded > 4:
