@@ -16,26 +16,44 @@ import random
 from threading import *
 
 
+#the nodes have a radius, but for the purposes of speed/efficiency, we do a bounding box collision detection
+def checkCollision(node, pos):
+    print pos, node.position
+    if pos[0] < node.position[0] - node.radius:
+        return False
+    if pos[0] > node.position[0] + node.radius:
+        return False
+    if pos[1] < node.position[1] - node.radius:
+        return False
+    if pos[1] > node.position[1] + node.radius:
+        return False
+    return True
+
 class Grapher:
 
     #all draw functions must take a screen, node and camera position (as tuple)
-    def defaultdrawfunction(self, screen, node, graph, cameraposition):
+    def defaultnodedrawfunction(self, screen, node, graph, cameraposition):
         pass
 
     graph = None
     
-    drawfunction = None
+    nodedrawfunction = None
     size = (600, 600)
+    camera = None
 
     running = False
     _quit = False #this can be changed using the stop() function with either another thread or the exit button at the top of the screen. When it does, the while loop in the thread breaks
 
     _thread = None
-    _lock = None
 
+    _mousemode = 0 # 0 - the mouse is unclicked and not performing any tasks, 1 - the mouse is controlling a node, 2 - the mouse is controlling the camera
+    _lastmousepos = (0, 0)
+    _clickednode = None
+    _clickednodestatic = False
+    
     _eventslist = []
 
-    def __init__(self, graph = None, size = (600, 600), drawfunction = None):
+    def __init__(self, graph = None, size = (600, 600), nodedrawfunction = None):
         if graph == None:
             self.graph = Graph.Graph()
         else:
@@ -43,24 +61,69 @@ class Grapher:
 
         self.size = size
         
-        if drawfunction == None:
-            self.drawfunction = self.defaultdrawfunction
+        if nodedrawfunction == None:
+            self.nodedrawfunction = self.defaultnodedrawfunction
         else:
-            self.drawfunction = drawfunction
+            self.nodedrawfunction = nodedrawfunction
 
-        self._lock = Lock()
+        self.camera = Camera()
             
 
     def setGraph(self, graph):
         self.graph = graph
 
-    def setDrawFunction(self, drawfunction):
-        self.drawfunction = drawfunction
+    def setNodeDrawFunction(self, nodedrawfunction):
+        self.nodedrawfunction = nodedrawfunction
 
     def getEvents(self):
         e = self._eventslist[:]
         self._eventslist = []
         return e
+
+    def _processMouseButtonClick(self, event):
+        if self._mousemode == 0 and event.button == 1:
+            for n in self.graph.nodes:
+                if checkCollision(self.graph.nodes[n], self.getRelativeMousePosition()): #the mouse is colliding with a node
+                    self._clickednode = n
+                    self._clickednodestatic = self.graph.nodes[n].static
+                    self.graph.nodes[n].static = True
+                    self._mousemode = 1
+                    return
+
+            #if we have reached this point it wasn't a node collision, therefore set it to camera mode
+            #just making sure we've definitely deselected the clicked node here
+            self._clickednode = None
+
+            self._mousemode = 2
+
+        elif event.button == 3:
+            self._eventslist = self._eventslist + [(1, event.button)]#the code to add an event to the event queue will go here
+                        
+                    
+
+    def _processMouseButtonRelease(self, event):
+        if event.button == 1:
+            if self._mousemode == 1: #deselecting the node that was selected
+                self.graph.nodes[self._clickednode].static = self._clickednodestatic
+                self.clickednode = None
+                self._mousemode = 0
+                return
+            elif self._mousemode == 2:
+                self._mousemode = 0
+
+
+    def _processMouseMovement(self, event):
+        if self._mousemode == 1:
+            self.graph.nodes[self._clickednode].position = self.getRelativeMousePosition()
+        elif self._mousemode == 2:
+            self.camera.position = (self.camera.position[0] + (self._lastmousepos[0] - pygame.mouse.get_pos()[0]), self.camera.position[1] + (self._lastmousepos[1] - pygame.mouse.get_pos()[1]))
+        self._lastmousepos = pygame.mouse.get_pos()
+
+
+    #gets the mosue position considering the camera position
+    def getRelativeMousePosition(self):
+        p = pygame.mouse.get_pos()
+        return (p[0] + self.camera.position[0], p[1] + self.camera.position[1])
         
     def start(self):
         self._thread = Thread(target = self._run)
@@ -83,24 +146,34 @@ class Grapher:
 
         #the main loop
         while not self._quit:
+
+            #processing mouse and key events
             for event in pygame.event.get():
                 if event.type == QUIT:
+                    print "QUITTING: CLOSE BUTTON HAS BEEN CLICKED..."
                     self._quit = True
+                elif event.type == MOUSEBUTTONDOWN:
+                    print event.button
+                    self._processMouseButtonClick(event)
+                elif event.type == MOUSEBUTTONUP:
+                    self._processMouseButtonRelease(event)
+                elif event.type == MOUSEMOTION:
+                        self._processMouseMovement(event)
+                        print self.camera.position
+                        print "mouserelative position", self.getRelativeMousePosition()
                 else:
-                    printstring = "EVENT:", event.type
-                    if event.type == pygame.KEYUP or event.type == pygame.KEYDOWN:
-                        printstring = printstring, ",", str(event.key)
-                        self._eventslist = self._eventslist + [printstring]
-
+                    pass
+                    #self._eventslist = self._eventslist + [event]
+        
             screen.blit(background, (0, 0))
 
-            self._lock.acquire(1)
+            self.graph.lock()
 
                 #drawing the lines
             for r in self.graph.relationships: #for every key in relationships set
                 for i in self.graph.relationships[r][0]:
-                    start = (self.graph.nodes[r].position)
-                    end = (self.graph.nodes[i].position)
+                    start = (self.graph.nodes[r].position[0]-self.camera.position[0], self.graph.nodes[r].position[1]-self.camera.position[1])
+                    end = (self.graph.nodes[i].position[0]-self.camera.position[0], self.graph.nodes[i].position[1]-self.camera.position[1])
                     pygame.draw.aaline(
                                     screen,
                                     (255, 255, 255),
@@ -110,13 +183,23 @@ class Grapher:
 
             #drawing the nodes
             for n in self.graph.nodes.values():
-                self.drawfunction(screen, n, self.graph, (0, 0))
+                #print "campos2", self.camera.position
+                self.nodedrawfunction(screen, n, self.graph, self.camera.position)
 
             self.graph.doPhysics(1)
 
-            self._lock.release()
+            self.graph.unlock()
             
             time.sleep(0.02)
 	
             pygame.display.flip()
-	
+
+        self.running = False
+
+
+class Camera():
+
+    position = (0, 0)
+    velocity = (0, 0)
+
+    friction = 0.8

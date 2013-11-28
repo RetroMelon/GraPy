@@ -35,13 +35,13 @@ class Node:
     velocity = (0.0, 0.0)
     acceleration = (0.0, 0.0)
     
-    mass = 1.0
+    mass = 0.5
     static = False
     charge = 1.0
 
-    boundingbox = ((-5, -5), (5, 5))
+    radius = 7
 
-    def __init__(self, uid, position = (0.0, 0.0), velocity = (0.0, 0.0), mass = 1, static = False, charge = 10, boundingbox = ((-5, -5), (5, 5)), neighbours = []):
+    def __init__(self, uid, position = (0.0, 0.0), velocity = (0.0, 0.0), mass = 0.5, static = False, charge = 10, boundingbox = ((-5, -5), (5, 5)), neighbours = []):
         self.UID = uid
         self.position = position
         self.velocity = velocity
@@ -122,18 +122,3 @@ class Node:
             self.position = (self.position[0] + self.velocity[0]*fractiontomove, self.position[1] + self.velocity[1]*fractiontomove)
             #print "position = ", self.position
         self.acceleration = (0, 0)
-
-
-##n1 = Node("node1", position = (0, 0))
-##n2 = Node("node2", position = (30, 40))
-##
-##print findDistance(n1, n2)
-##print findDistanceTuple(n1, n2)
-##
-##print "calculating repulsive:"
-##print n1.calculateRepulsiveForce(n2)
-##print math.hypot(n1.calculateRepulsiveForce(n2)[0], n1.calculateRepulsiveForce(n2)[1])
-##
-##print "\ncalculating attractive:"
-##print n1.calculateAttractiveForce(n2)
-##print math.hypot(n1.calculateAttractiveForce(n2)[0], n1.calculateAttractiveForce(n2)[1])

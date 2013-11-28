@@ -20,11 +20,11 @@ def drawfunction(screen, node, graph, cameraposition):
 
     #n produces a colour gradient between 0 and 254 depending on the number of relationships
     n = (((1 + 1.0/(0.35*(relationships+1)))**(0.35*relationships)-1)/1.71828)*254 #tends to 254 as relaitonships tend to infinity
-        
-    pygame.draw.circle(screen, (int(n), 0, 255-int(n)), intpos, 10, 0)
+
+    pygame.draw.circle(screen, (int(n), 0, 255-int(n)), (intpos[0]-cameraposition[0], intpos[1]-cameraposition[1]), node.radius, 0)
 
     f = pygame.font.Font(None, 20).render(str(relationships), 1, (255, 255, 255))
-    screen.blit(f, (node.position[0]-5, node.position[1]-5))
+    screen.blit(f, (node.position[0]-cameraposition[0]-5, node.position[1]-cameraposition[1]-5))
 
 graph = Graph.Graph()
 
@@ -35,7 +35,7 @@ g = Grapher.Grapher(graph = graph)
 lastnodeadded = lastnodeadded + 1
 graph.addNode(Node.Node(str(lastnodeadded), position = (300, 300)))
 
-g.setDrawFunction(drawfunction)
+g.setNodeDrawFunction(drawfunction)
 
 g.start()
 
@@ -45,7 +45,7 @@ while not Quit:
     events = g.getEvents()
     if len(events) > 0:
         lastnodeadded = lastnodeadded + 1
-        graph.addNode(Node.Node(str(lastnodeadded), position = (random.randint(0, 600), random.randint(0, 600))))
+        graph.addNode(Node.Node(str(lastnodeadded), position = g.getRelativeMousePosition()))
         if lastnodeadded > 4:
             numtoadd = random.randint(2, 4)
             for i in range(0, numtoadd):
