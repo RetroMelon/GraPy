@@ -132,7 +132,7 @@ class Grapher:
     def _run(self):
         self.running = True
         pygame.init()
-        screen = pygame.display.set_mode((600, 600))
+        screen = pygame.display.set_mode((800, 600))
 
         background = pygame.Surface(screen.get_size())
         background = background.convert()
@@ -145,6 +145,8 @@ class Grapher:
 
         #the main loop
         while not self._quit:
+
+            self.graph.lock("grapher")
 
             #processing mouse and key events
             for event in pygame.event.get():
@@ -161,13 +163,12 @@ class Grapher:
                     self._eventslist = self._eventslist + [event]
         
             screen.blit(background, (0, 0))
+            
 
-            self.graph.lock()
-            time.sleep(0.01)
-
-                #drawing the lines
+            #drawing the lines
             for r in self.graph.relationships: #for every key in relationships set
                 for i in self.graph.relationships[r][0]:
+                    #print "drawing relation between", r, "and", i
                     start = (self.graph.nodes[r].position[0]-self.camera.position[0], self.graph.nodes[r].position[1]-self.camera.position[1])
                     end = (self.graph.nodes[i].position[0]-self.camera.position[0], self.graph.nodes[i].position[1]-self.camera.position[1])
                     pygame.draw.aaline(
@@ -176,6 +177,7 @@ class Grapher:
                                     start,
                                     end,
                                     1)
+            #print "finished drawing relationships"
 
             #drawing the nodes
             for n in self.graph.nodes.values():
@@ -184,7 +186,7 @@ class Grapher:
 
             self.graph.doPhysics(1)
 
-            self.graph.unlock()
+            self.graph.unlock("grapher")
             
             time.sleep(0.02)
 	

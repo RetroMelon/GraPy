@@ -14,24 +14,18 @@ class Graph:
     nodes = {}
     relationships = {} #relationships contains 2 lists for each entry. the first is outgoing, the second is incoming
 
-    _locked = False
-    _operating = False
+    _lock = threading.Lock()
 
-    def lock(self):
-        self._locked = True
+    def lock(self, name):
+        self._lock.acquire()
+        #print "lock acquired by", name
 
-    def unlock(self):
-        self._locked = False
+    def unlock(self, name):
+        #print "lock released by", name
+        self._lock.release()
+        
 
-    def _safetycheck(self):
-        while self._locked:
-            pass
-
-    def addNode(self, node):
-        self._safetycheck()
-        self._addNode(node)
-
-    def _addNode(self, node):        
+    def addNode(self, node):     
         if node.UID in self.nodes:
             self.removeNode(node.UID)
 
@@ -45,36 +39,31 @@ class Graph:
         self.nodes[node.UID] = node
         self.relationships[node.UID] = [[],[]]
 
-
-    def removeNode(self, nodeID):
-        self._safetycheck()
-        self._removeNode(nodeID)
-
     #takes the ID of a node to remove
-    def _removeNode(self, nodeID):
+    def removeNode(self, nodeID):
+        #print "REMOVING NODE", nodeID
+        #print "OUTGOING:", self.relationships[nodeID][0], "   INCOMING:", self.relationships[nodeID][1]
         if not nodeID in self.nodes:
             print "TRIED TO REMOVE NODE", nodeID, "WHICH DIDN'T EXIST."
             return
-
-        #locking the dictionaries so we don't run in to errors
         
         for outgoingrelation in self.relationships[nodeID][0]:
             self.removeRelationship(nodeID, outgoingrelation)
             #relationships[outgoingrelation][1].remove(node.UID)
 
-        for incomingrelation in self.relationships[nodeID][1]:
+        incomings = self.relationships[nodeID][1][:]
+
+        for incomingrelation in incomings:
+            #print "removing incoming relation", incomingrelation, "for", nodeID 
             self.removeRelationship(incomingrelation, nodeID)
             #relationships[incomingrelation][0].remove(node.UID)
 
         del self.relationships[nodeID]
         del self.nodes[nodeID]
 
-    def removeRelationship(self, outgoing, incoming):
-        self._safetycheck()
-        self._removeRelationship(outgoing, incoming)
-
     #takes the IDs of the outgoing and imconing nodes
-    def _removeRelationship(self, outgoing, incoming):
+    def removeRelationship(self, outgoing, incoming):
+        #print "removing relationship", outgoing, ">", incoming
         if (not outgoing in self.relationships):
             print "TRIED TO REMOVE RELATIONSHIP", outgoing, " > ", incoming, "WHEN OUTGOING DIDN'T EXIST."
             return
@@ -82,14 +71,10 @@ class Graph:
             print "TRIED TO REMOVE RELATIONSHIP", outgoing, " > ", incoming, "WHEN INCOMING DIDN'T EXIST."
             return
         
-        print self.relationships[outgoing][0].remove(incoming)
-        print self.relationships[incoming][1].remove(outgoing)
+        self.relationships[outgoing][0].remove(incoming)
+        self.relationships[incoming][1].remove(outgoing)
 
     def addRelationship(self, outgoing, incoming):
-        self._safetycheck()
-        self._addRelationship(outgoing, incoming)
-
-    def _addRelationship(self, outgoing, incoming):
         if (not outgoing in self.relationships):
             print "TRIED TO ADD RELATIONSHIP", outgoing, " > ", incoming, "WHEN OUTGOING DIDN'T EXIST."
             return
@@ -99,7 +84,7 @@ class Graph:
         if (outgoing == incoming):
             print "TRIED TO ADD RELATIONSHIP BETWEEN NODE", outgoing, "AND ITSELF."
             return
-        if (outgoing in self.relationships[outgoing][0]):
+        if (incoming in self.relationships[outgoing][0]):
             print "RELATIONSHIP", outgoing, " > ", incoming, "ALREADY EXISTS."
             return
         
