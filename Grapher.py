@@ -18,7 +18,6 @@ from threading import *
 
 #the nodes have a radius, but for the purposes of speed/efficiency, we do a bounding box collision detection
 def checkCollision(node, pos):
-    print pos, node.position
     if pos[0] < node.position[0] - node.radius:
         return False
     if pos[0] > node.position[0] + node.radius:
@@ -153,21 +152,18 @@ class Grapher:
                     print "QUITTING: CLOSE BUTTON HAS BEEN CLICKED..."
                     self._quit = True
                 elif event.type == MOUSEBUTTONDOWN:
-                    print event.button
                     self._processMouseButtonClick(event)
                 elif event.type == MOUSEBUTTONUP:
                     self._processMouseButtonRelease(event)
                 elif event.type == MOUSEMOTION:
                         self._processMouseMovement(event)
-                        print self.camera.position
-                        print "mouserelative position", self.getRelativeMousePosition()
-                else:
-                    pass
-                    #self._eventslist = self._eventslist + [event]
+                elif event.type == KEYDOWN:
+                    self._eventslist = self._eventslist + [event]
         
             screen.blit(background, (0, 0))
 
             self.graph.lock()
+            time.sleep(0.01)
 
                 #drawing the lines
             for r in self.graph.relationships: #for every key in relationships set

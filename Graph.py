@@ -12,7 +12,7 @@ class Graph:
     
     #these will be accessed as properties so that we can check if they are locked properly
     nodes = {}
-    relationships = {}
+    relationships = {} #relationships contains 2 lists for each entry. the first is outgoing, the second is incoming
 
     _locked = False
     _operating = False
@@ -34,6 +34,13 @@ class Graph:
     def _addNode(self, node):        
         if node.UID in self.nodes:
             self.removeNode(node.UID)
+
+
+        ##########################
+        #
+        #   PREVENT CRASHING BY NOT ADDING DUPLICATE RELATIONSHIPS
+        #
+        ##########################
 
         self.nodes[node.UID] = node
         self.relationships[node.UID] = [[],[]]
@@ -64,7 +71,7 @@ class Graph:
 
     def removeRelationship(self, outgoing, incoming):
         self._safetycheck()
-        self.removeRelationship(outgoing, incoming)
+        self._removeRelationship(outgoing, incoming)
 
     #takes the IDs of the outgoing and imconing nodes
     def _removeRelationship(self, outgoing, incoming):
@@ -75,8 +82,8 @@ class Graph:
             print "TRIED TO REMOVE RELATIONSHIP", outgoing, " > ", incoming, "WHEN INCOMING DIDN'T EXIST."
             return
         
-        self.relationships[outgoing][0].remove(incoming)
-        self.relationships[incoming][1].remove(outgoing)
+        print self.relationships[outgoing][0].remove(incoming)
+        print self.relationships[incoming][1].remove(outgoing)
 
     def addRelationship(self, outgoing, incoming):
         self._safetycheck()
@@ -88,6 +95,12 @@ class Graph:
             return
         if (not incoming in self.relationships):
             print "TRIED TO ADD RELATIONSHIP", outgoing, " > ", incoming, "WHEN INCOMING DIDN'T EXIST."
+            return
+        if (outgoing == incoming):
+            print "TRIED TO ADD RELATIONSHIP BETWEEN NODE", outgoing, "AND ITSELF."
+            return
+        if (outgoing in self.relationships[outgoing][0]):
+            print "RELATIONSHIP", outgoing, " > ", incoming, "ALREADY EXISTS."
             return
         
         self.relationships[outgoing][0] = self.relationships[outgoing][0] + [incoming]

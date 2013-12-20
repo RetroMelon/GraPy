@@ -6,14 +6,6 @@ import time
 import pygame
 import math
 
-################################################
-################################################
-#USE PROPERTIES WITHIN GRAPH.PY TO EDIT NODES AND RELATIONSHIPS. IF IT
-#IS OWNED BY A GRAPHER, MAKE A QUEUE OF CHANGES TO BE MADE, AND THEN
-#ONCE THE GRAPHER IS FINISHED, MAKE ALL OF THE CHANGES.
-################################################
-################################################
-
 def drawfunction(screen, node, graph, cameraposition):
     intpos = (int(node.position[0]), int(node.position[1]))
     relationships = len(graph.relationships[node.UID][0]) + len(graph.relationships[node.UID][1])
@@ -23,7 +15,7 @@ def drawfunction(screen, node, graph, cameraposition):
 
     pygame.draw.circle(screen, (int(n), 0, 255-int(n)), (intpos[0]-cameraposition[0], intpos[1]-cameraposition[1]), node.radius, 0)
 
-    f = pygame.font.Font(None, 20).render(str(relationships), 1, (255, 255, 255))
+    f = pygame.font.Font(None, 20).render(str(relationships) + "-" + node.UID, 1, (255, 255, 255))
     screen.blit(f, (node.position[0]-cameraposition[0]-5, node.position[1]-cameraposition[1]-5))
 
 graph = Graph.Graph()
@@ -44,12 +36,23 @@ Quit = False
 while not Quit:
     events = g.getEvents()
     if len(events) > 0:
+        for e in events:
+            if e[0] == 1:
+                for n in graph.nodes:
+                    if Grapher.checkCollision(graph.nodes[n], g.getRelativeMousePosition()):
+                        graph.removeNode(n)
+                        break
         lastnodeadded = lastnodeadded + 1
         graph.addNode(Node.Node(str(lastnodeadded), position = g.getRelativeMousePosition()))
         if lastnodeadded > 4:
             numtoadd = random.randint(2, 4)
             for i in range(0, numtoadd):
-                graph.addRelationship(str(lastnodeadded), random.choice(graph.nodes.keys()))
+                othernode =  random.choice(graph.nodes.keys())
+                if othernode == lastnodeadded:
+                    continue
+                graph.addRelationship(str(lastnodeadded), othernode)
         else:
             graph.addRelationship(str(lastnodeadded), str(lastnodeadded-1))
     time.sleep(0.2)
+
+

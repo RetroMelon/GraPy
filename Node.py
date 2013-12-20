@@ -115,10 +115,7 @@ class Node:
         if not self.static:
             fractiontomove = timeinterval/1000.0
 
-            #self.acceleration = (self.acceleration[0]*(1-frictionCoefficient*fractiontomove), self.acceleration[1]*(1-frictionCoefficient*fractiontomove))
             self.velocity = (self.velocity[0] + self.acceleration[0]*fractiontomove, self.velocity[1] + self.acceleration[1]*fractiontomove)
             self.velocity = (self.velocity[0]*frictionCoefficient, self.velocity[1]*frictionCoefficient)
-            #print "velocity = ", self.velocity
             self.position = (self.position[0] + self.velocity[0]*fractiontomove, self.position[1] + self.velocity[1]*fractiontomove)
-            #print "position = ", self.position
         self.acceleration = (0, 0)
