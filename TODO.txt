@@ -1,0 +1,7 @@
+	*tidy up code
+	*add functionality for drawing in the background, foreground, and changing the connection-drawing functions
+	*add functionality for adding nodes, and automatically finding the best place in the graph to place them
+	*clean up event code, so that we can easily determine which events have occured
+	*Change the locations of the constants vriables to be in the best location
+	*Make all variables in to properties
+	*make the radius a property, and also adjust the bounding box at the same time

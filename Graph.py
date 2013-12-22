@@ -6,11 +6,10 @@ import threading
 #the main datastructure is a dictionary of nodes. where the key is the UID and the value is the node
 #the other datastructure is of all of the relationships.
 #this datastructure uses the UID as a key
-#the value is a list like this[[outgoingrelationships as UIDs], [incomingrelationships as UIDs]]
+#the value is a list like this [[outgoingrelationships as UIDs], [incomingrelationships as UIDs]]
 
 class Graph:
     
-    #these will be accessed as properties so that we can check if they are locked properly
     nodes = {}
     relationships = {} #relationships contains 2 lists for each entry. the first is outgoing, the second is incoming
 
@@ -18,52 +17,38 @@ class Graph:
 
     def lock(self, name):
         self._lock.acquire()
-        #print "lock acquired by", name
 
     def unlock(self, name):
-        #print "lock released by", name
         self._lock.release()
-        
 
+    #takes a node to add to the graph
+    #if the node already exists, we remove it and all its relationships, and re-add it
     def addNode(self, node):     
         if node.UID in self.nodes:
             self.removeNode(node.UID)
-
-
-        ##########################
-        #
-        #   PREVENT CRASHING BY NOT ADDING DUPLICATE RELATIONSHIPS
-        #
-        ##########################
 
         self.nodes[node.UID] = node
         self.relationships[node.UID] = [[],[]]
 
     #takes the ID of a node to remove
     def removeNode(self, nodeID):
-        #print "REMOVING NODE", nodeID
-        #print "OUTGOING:", self.relationships[nodeID][0], "   INCOMING:", self.relationships[nodeID][1]
         if not nodeID in self.nodes:
             print "TRIED TO REMOVE NODE", nodeID, "WHICH DIDN'T EXIST."
             return
         
         for outgoingrelation in self.relationships[nodeID][0]:
             self.removeRelationship(nodeID, outgoingrelation)
-            #relationships[outgoingrelation][1].remove(node.UID)
 
         incomings = self.relationships[nodeID][1][:]
 
         for incomingrelation in incomings:
-            #print "removing incoming relation", incomingrelation, "for", nodeID 
             self.removeRelationship(incomingrelation, nodeID)
-            #relationships[incomingrelation][0].remove(node.UID)
 
         del self.relationships[nodeID]
         del self.nodes[nodeID]
 
     #takes the IDs of the outgoing and imconing nodes
     def removeRelationship(self, outgoing, incoming):
-        #print "removing relationship", outgoing, ">", incoming
         if (not outgoing in self.relationships):
             print "TRIED TO REMOVE RELATIONSHIP", outgoing, " > ", incoming, "WHEN OUTGOING DIDN'T EXIST."
             return
@@ -74,6 +59,7 @@ class Graph:
         self.relationships[outgoing][0].remove(incoming)
         self.relationships[incoming][1].remove(outgoing)
 
+    #adds a directional relationship to the graph between nodes
     def addRelationship(self, outgoing, incoming):
         if (not outgoing in self.relationships):
             print "TRIED TO ADD RELATIONSHIP", outgoing, " > ", incoming, "WHEN OUTGOING DIDN'T EXIST."
@@ -87,7 +73,8 @@ class Graph:
         if (incoming in self.relationships[outgoing][0]):
             print "RELATIONSHIP", outgoing, " > ", incoming, "ALREADY EXISTS."
             return
-        
+
+        #adding the relationships in the appropriate locations
         self.relationships[outgoing][0] = self.relationships[outgoing][0] + [incoming]
         self.relationships[incoming][1] = self.relationships[incoming][1] + [outgoing]
 
@@ -106,9 +93,7 @@ class Graph:
     def calculateAttractiveForces(self):
         for nodeUID in self.relationships:
             for outgoingrelationUID in self.relationships[nodeUID][0]:
-                #print "calculating an attractive force for node", nodeUID
                 fx, fy = self.nodes[nodeUID].calculateAttractiveForce(self.nodes[outgoingrelationUID])
-                #print fx, fy
                 self.nodes[nodeUID].applyForce((fx, fy))
                 self.nodes[outgoingrelationUID].applyForce((-fx, -fy))
 

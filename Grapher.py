@@ -96,7 +96,7 @@ class Grapher:
             self._mousemode = 2
 
         elif event.button == 3:
-            self._eventslist = self._eventslist + [(1, event.button)]#the code to add an event to the event queue will go here
+            self._eventslist = self._eventslist + [(1, event.button)] #the code to add an event to the event queue will go here
                         
                     
 
@@ -139,16 +139,16 @@ class Grapher:
         background.fill((20, 20, 20))
 
 
-        # Blit everything to the screen
+        #Blit everything to the screen
         screen.blit(background, (0, 0))
         pygame.display.flip()
 
-        #the main loop
+        #The main loop
         while not self._quit:
 
             self.graph.lock("grapher")
 
-            #processing mouse and key events
+            #Processing mouse and key events
             for event in pygame.event.get():
                 if event.type == QUIT:
                     print "QUITTING: CLOSE BUTTON HAS BEEN CLICKED..."
@@ -165,10 +165,9 @@ class Grapher:
             screen.blit(background, (0, 0))
             
 
-            #drawing the lines
-            for r in self.graph.relationships: #for every key in relationships set
+            #Drawing the lines
+            for r in self.graph.relationships: #For every key in relationships set
                 for i in self.graph.relationships[r][0]:
-                    #print "drawing relation between", r, "and", i
                     start = (self.graph.nodes[r].position[0]-self.camera.position[0], self.graph.nodes[r].position[1]-self.camera.position[1])
                     end = (self.graph.nodes[i].position[0]-self.camera.position[0], self.graph.nodes[i].position[1]-self.camera.position[1])
                     pygame.draw.aaline(
@@ -177,11 +176,9 @@ class Grapher:
                                     start,
                                     end,
                                     1)
-            #print "finished drawing relationships"
 
             #drawing the nodes
             for n in self.graph.nodes.values():
-                #print "campos2", self.camera.position
                 self.nodedrawfunction(screen, n, self.graph, self.camera.position)
 
             self.graph.doPhysics(1)

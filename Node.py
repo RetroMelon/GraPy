@@ -1,11 +1,9 @@
 import math
-
 #the node class is one that has a UID, and some physical properties to define its location in space.
 #the node class knows only of itself, so has no knowledge of which nodes it is connected to.
 #it calculates all forces that would act upon itself, never forces that would act upon another node.
 
-
-attractiveForceConstant = 6000
+attractiveForceConstant = 7000
 repulsiveForceConstant = 3000000
 minSpringSize = 65
 frictionCoefficient = 0.95
@@ -14,7 +12,7 @@ frictionCoefficient = 0.95
 def findDistance(node1, node2):
     d = math.hypot((node2.position[0] - node1.position[0]), (node2.position[1] - node1.position[1]))
     
-    n = 7.0/(3000000) * repulsiveForceConstant
+    n = 0.000002 * repulsiveForceConstant
 
     if d < n: #this prevents the distance being tiny and the nodes flying off in to infinity
         d = n
@@ -35,7 +33,7 @@ class Node:
     velocity = (0.0, 0.0)
     acceleration = (0.0, 0.0)
     
-    mass = 0.5
+    mass = 0.25
     static = False
     charge = 1.0
 
@@ -58,17 +56,11 @@ class Node:
     #when we say force we are referring to a tuple with x and y values in that order
     #a force represents the actual direction of travel of the node, so we don't need to negate the force before applying it or anything
     def calculateAttractiveForce(self, other):
-        #forcex = 0.0
-        #forcey = 0.0
-
         forcemagnitude = self._calcAttractiveForceMagnitude(other)
         distanceangle = findAngle(self, other)
 
         forcex = math.cos(distanceangle) * forcemagnitude
         forcey = math.sin(distanceangle) * forcemagnitude
-
-        #forcex = math.copysign((1.0*distance[1]/distancemagnitude)*forcemagnitude, distance[0])
-        #forcey = math.copysign((1.0*distance[0]/distancemagnitude)*forcemagnitude, distance[1])
 
         return (forcex, forcey)
         
@@ -79,17 +71,11 @@ class Node:
         return attractiveForceConstant * (distance - minSpringSize) #we should perhaps add in a minimum string length later on.
 
     def calculateRepulsiveForce(self, other):
-        #forcex = 0.0
-        #forcey = 0.0
-        
         forcemagnitude = self._calcRepulsiveForceMagnitude(other)
         distanceangle = findAngle(self, other)
 
         forcex = math.cos(distanceangle) * forcemagnitude
         forcey = math.sin(distanceangle) * forcemagnitude
-        
-        #forcex = -math.copysign((1.0*distance[1]/distancemagnitude)*forcemagnitude, distance[0])
-        #forcey = -math.copysign((1.0*distance[0]/distancemagnitude)*forcemagnitude, distance[1])
         
         return (forcex, forcey)
 
@@ -104,7 +90,6 @@ class Node:
         return map(self.calculateRepulsiveForces, nodeslist)
 
     def applyForce(self, force):
-        #print "applying force", force
         self.acceleration = (self.acceleration[0] + force[0]/self.mass, self.acceleration[1] + force[1]/self.mass)
 
     def applyForces(self, forcelist):
