@@ -21,6 +21,7 @@ class Graph:
     def unlock(self, name):
         self._lock.release()
 
+
     #takes a node to add to the graph
     #if the node already exists, we remove it and all its relationships, and re-add it
     def addNode(self, node):     
@@ -29,6 +30,7 @@ class Graph:
 
         self.nodes[node.UID] = node
         self.relationships[node.UID] = [[],[]]
+
 
     #takes the ID of a node to remove
     def removeNode(self, nodeID):
@@ -47,6 +49,7 @@ class Graph:
         del self.relationships[nodeID]
         del self.nodes[nodeID]
 
+
     #takes the IDs of the outgoing and imconing nodes
     def removeRelationship(self, outgoing, incoming):
         if (not outgoing in self.relationships):
@@ -58,6 +61,7 @@ class Graph:
         
         self.relationships[outgoing][0].remove(incoming)
         self.relationships[incoming][1].remove(outgoing)
+
 
     #adds a directional relationship to the graph between nodes
     def addRelationship(self, outgoing, incoming):
@@ -78,6 +82,7 @@ class Graph:
         self.relationships[outgoing][0] = self.relationships[outgoing][0] + [incoming]
         self.relationships[incoming][1] = self.relationships[incoming][1] + [outgoing]
 
+
     #the function that does all of the physics calculations. timeinterval is in miliseconds
     #we do the following things:
         #calculate and apply attractive forces
@@ -89,6 +94,7 @@ class Graph:
 
         self.moveAllNodes(timeinterval)
 
+
     #we go through every outgoing relationship, and for each one apply a force to both the outgoing node and incoming
     def calculateAttractiveForces(self):
         for nodeUID in self.relationships:
@@ -97,14 +103,16 @@ class Graph:
                 self.nodes[nodeUID].applyForce((fx, fy))
                 self.nodes[outgoingrelationUID].applyForce((-fx, -fy))
 
-    #right now this method calculates repulsive forces for all nodes on the graph, but in future
-    #a goood optimisation is only to calculate it for the closest nodes
+
+    #this method calculates and applies repulsive forces for each node on oneanother. 
     def calculateRepulsiveForces(self):
-        for n in self.nodes.values():
-            for m in self.nodes.values():
-                if n == m:
-                    continue
-                n.applyForce(n.calculateRepulsiveForce(m))
+        valueslist = self.nodes.values()
+        for index, node in enumerate(valueslist):
+            for node2 in valueslist[index:]:
+                fx, fy = node.calculateRepulsiveForce(node2)
+                node.applyForce((fx, fy))
+                node2.applyForce((-fx, -fy))
+                
 
     #applies each node's forces to it
     def moveAllNodes(self, timeinterval):
