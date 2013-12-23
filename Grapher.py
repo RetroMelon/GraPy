@@ -104,7 +104,7 @@ class Grapher:
     def setForegroundDrawFunction(self, foregrounddrawfunction):
         self.foregrounddrawfunction = foregrounddrawfunction
 
-
+    #this method gets a list of all of the mouse and key events since the last call.
     def getEvents(self):
         e = self._eventslist[:]
         self._eventslist = []
@@ -116,6 +116,13 @@ class Grapher:
         p = pygame.mouse.get_pos()
         return (p[0] + self.camera.position[0], p[1] + self.camera.position[1])
 
+    #returns the UID of the first node that it finds to collide with "position". "position" is a tuple of x and y coords.
+    #if no nodes collide, None is returned
+    def findCollidingNode(self, position):
+        for n in self.graph.nodes:
+                if checkCollision(self.graph.nodes[n], position):
+                    return n
+        return None
 
     def start(self):
         self._thread = Thread(target = self._run)
@@ -133,46 +140,54 @@ class Grapher:
                     self._processMouseButtonRelease(event)
                 elif event.type == MOUSEMOTION:
                         self._processMouseMovement(event)
-                elif event.type == KEYDOWN:
-                    self._eventslist = self._eventslist + [event]
+                        
 
     def _processMouseButtonClick(self, event):
+        #for every mouse click we dispatch an event. a mouse event looks like
+        #a tuple (eventtype(0 or click, 1 for release), eventbutton, node if clicked/None)
+        #although we dispatch mouse events for mouse event 1, it is important to note that we will still drag the node around
+        collidingnode = self.findCollidingNode(self.getRelativeMousePosition())
+        
+        #if the mouse is currently not doing anything, and we've clicked the primary mouse button, 
         if self._mousemode == 0 and event.button == 1:
-            for n in self.graph.nodes:
-                if checkCollision(self.graph.nodes[n], self.getRelativeMousePosition()): #the mouse is colliding with a node
-                    self._clickednode = n
-                    self._clickednodestatic = self.graph.nodes[n].static
-                    self.graph.nodes[n].static = True
+            if not collidingnode == None:
+                    self._clickednode = collidingnode
+                    self._clickednodestatic = self.graph.nodes[collidingnode].static #taking note of whether the colliding node is static so we can reset it correctly later
+                    self.graph.nodes[collidingnode].static = True
                     self._mousemode = 1
-                    return
+            else:
+                self._mousemode = 2
 
-            #if we have reached this point it wasn't a node collision, therefore set it to camera mode
-            #just making sure we've definitely deselected the clicked node here
-            self._clickednode = None
-
-            self._mousemode = 2
-
-        elif event.button == 3:
-            self._eventslist = self._eventslist + [(1, event.button)] #the code to add an event to the event queue will go here
+        self._eventslist = self._eventslist + [(0, event.button, collidingnode)] #the code to add an event to the event queue will go here
              
 
     def _processMouseButtonRelease(self, event):
+        collidingnode = self.findCollidingNode(self.getRelativeMousePosition())
+        
         if event.button == 1:
             if self._mousemode == 1: #deselecting the node that was selected
-                self.graph.nodes[self._clickednode].static = self._clickednodestatic
-                self.clickednode = None
-                self._mousemode = 0
-                return
-            elif self._mousemode == 2:
-                self._mousemode = 0
+                if self._clickednode in self.graph.nodes:
+                    self.graph.nodes[self._clickednode].static = self._clickednodestatic
+            self._resetmousemode()
+
+        self._eventslist = self._eventslist + [(1, event.button, collidingnode)]
 
 
     def _processMouseMovement(self, event):
         if self._mousemode == 1:
-            self.graph.nodes[self._clickednode].position = self.getRelativeMousePosition()
+            #we need to check if the clicked node still exists because there is a chance it could have been deleted since the last mouse move
+            if self._clickednode in self.graph.nodes:
+                self.graph.nodes[self._clickednode].position = self.getRelativeMousePosition()
+            else:
+                self._resetmousemode()
         elif self._mousemode == 2:
             self.camera.position = (self.camera.position[0] + (self._lastmousepos[0] - pygame.mouse.get_pos()[0]), self.camera.position[1] + (self._lastmousepos[1] - pygame.mouse.get_pos()[1]))
         self._lastmousepos = pygame.mouse.get_pos()
+
+
+    def _resetmousemode(self):
+        self._clickednode = None
+        self._mousemode = 0
 
 
     #the main function which will be run in a separate thread
@@ -183,18 +198,24 @@ class Grapher:
         pygame.init()
         screen = pygame.display.set_mode(self.size)
 
+        framecount = 0
         #The main loop
         while not self._quit:
-
+            framecount = framecount + 1
             #locking the graph datastructure so that it canot be changed while we iterate over it
             self.graph.lock()
 
+            starttime = time.clock()
             #Processing mouse and key events
             self._processInput()
+            inputtime = time.clock() - starttime
 
+            starttime = time.clock()
             #doing all physics
             self.graph._doPhysics(1)
+            physicstime = time.clock() - starttime
 
+            starttime = time.clock()
             #doing all drawing
             self.backgrounddrawfunction(screen, self.camera.position)
             
@@ -209,9 +230,14 @@ class Grapher:
 
             pygame.display.flip()
 
+            drawtime = time.clock() - starttime
             #unlocking the graph to allow other threads to use/edit it
             self.graph.unlock()
-            
+
+            if(framecount%100 == 0):
+                print "TIMES:  ", "Input", inputtime, "   Physics", physicstime, "   Draw", drawtime
+                framecount = 0
+    
             time.sleep(0.02)
 	
         self.running = False

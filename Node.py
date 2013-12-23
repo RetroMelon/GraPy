@@ -3,10 +3,10 @@ import math
 #the node class knows only of itself, so has no knowledge of which nodes it is connected to.
 #it calculates all forces that would act upon itself, never forces that would act upon another node.
 
-attractiveForceConstant = 7000
-repulsiveForceConstant = 3000000
+attractiveForceConstant = 10000
+repulsiveForceConstant = 30000000
 minSpringSize = 65
-frictionCoefficient = 0.95
+frictionCoefficient = 0.85
 
 #def finds the distance as a scalar (the hypot of the x and y positions
 def findDistance(node1, node2):
@@ -37,7 +37,7 @@ class Node:
     static = False
     charge = 1.0
 
-    radius = 7
+    radius = 9
 
     def __init__(self, uid, position = (0.0, 0.0), velocity = (0.0, 0.0), mass = 0.5, static = False, charge = 10, boundingbox = ((-5, -5), (5, 5)), neighbours = []):
         self.UID = uid
