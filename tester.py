@@ -41,16 +41,16 @@ while not Quit:
             if e[0] == 1:
                 for n in graph.nodes:
                     if Grapher.checkCollision(graph.nodes[n], g.getRelativeMousePosition()):
-                        graph.lock("Tester")
+                        graph.lock()
                         graph.removeNode(n)
                         removed = True
-                        graph.unlock("Tester")
+                        graph.unlock()
                         break
         if not removed:
             lastnodeadded = lastnodeadded + 1
-            graph.lock("Tester")
+            graph.lock()
             graph.addNode(Node.Node(str(lastnodeadded), position = g.getRelativeMousePosition()))
-            graph.unlock("Tester")
+            graph.unlock()
             if lastnodeadded > 4:
                 numtoadd = random.randint(2, 4)
                 for i in range(0, numtoadd):

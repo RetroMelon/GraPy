@@ -15,10 +15,10 @@ class Graph:
 
     _lock = threading.Lock()
 
-    def lock(self, name):
+    def lock(self):
         self._lock.acquire()
 
-    def unlock(self, name):
+    def unlock(self):
         self._lock.release()
 
 
@@ -88,15 +88,15 @@ class Graph:
         #calculate and apply attractive forces
         #calculate and apply repulsive forces
         #move each node
-    def doPhysics(self, timeinterval):
-        self.calculateAttractiveForces()
-        self.calculateRepulsiveForces()
+    def _doPhysics(self, timeinterval):
+        self._calculateAttractiveForces()
+        self._calculateRepulsiveForces()
 
-        self.moveAllNodes(timeinterval)
+        self._moveAllNodes(timeinterval)
 
 
     #we go through every outgoing relationship, and for each one apply a force to both the outgoing node and incoming
-    def calculateAttractiveForces(self):
+    def _calculateAttractiveForces(self):
         for nodeUID in self.relationships:
             for outgoingrelationUID in self.relationships[nodeUID][0]:
                 fx, fy = self.nodes[nodeUID].calculateAttractiveForce(self.nodes[outgoingrelationUID])
@@ -105,16 +105,15 @@ class Graph:
 
 
     #this method calculates and applies repulsive forces for each node on oneanother. 
-    def calculateRepulsiveForces(self):
-        valueslist = self.nodes.values()
-        for index, node in enumerate(valueslist):
-            for node2 in valueslist[index:]:
+    def _calculateRepulsiveForces(self):
+        for index, node in enumerate(self.nodes.values()):
+            for node2 in self.nodes.values()[index:]:
                 fx, fy = node.calculateRepulsiveForce(node2)
                 node.applyForce((fx, fy))
                 node2.applyForce((-fx, -fy))
                 
 
     #applies each node's forces to it
-    def moveAllNodes(self, timeinterval):
+    def _moveAllNodes(self, timeinterval):
         for n in self.nodes.values():
             n.move(timeinterval)

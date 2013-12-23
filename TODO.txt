@@ -1,7 +1,13 @@
 	*tidy up code
-	*add functionality for drawing in the background, foreground, and changing the connection-drawing functions
+D	*add functionality for drawing in the background, foreground, and changing the connection-drawing functions
 	*add functionality for adding nodes, and automatically finding the best place in the graph to place them
 	*clean up event code, so that we can easily determine which events have occured
 	*Change the locations of the constants vriables to be in the best location
 	*Make all variables in to properties
 	*make the radius a property, and also adjust the bounding box at the same time
+	*Fix the crashing when you remove a node you're currently grabbing
+	*get rid of the gets and sets in the grapher file
+	*go through the entire code, and make sure it abides by python conventions
+	*add a debug function instead of just normal print statements
+	*add ability to store data along with each node
+	*Make a framerate timer and fix friction so it acts correctly for different frame rates

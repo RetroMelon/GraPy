@@ -34,10 +34,23 @@ class Grapher:
     def defaultnodedrawfunction(self, screen, node, graph, cameraposition):
         pass
 
+    def defaultvertexdrawfunction(self, screen, start, end):
+        pygame.draw.aaline(screen, (255, 255, 255), start, end, 1)
+
+    def defaultbackgrounddrawfunction(self, screen, cameraposition):
+        screen.fill((20, 20, 20))
+
+    def defaultforegrounddrawfunction(self, screen, cameraposition):
+        pass
+
     graph = None
-    
+
+    backgrounddrawfunction = None
     nodedrawfunction = None
-    size = (600, 600)
+    linedrawfunction = None
+    foregrounddrawfunction = None
+    
+    size = (800, 600)
     camera = None
 
     running = False
@@ -52,7 +65,7 @@ class Grapher:
     
     _eventslist = []
 
-    def __init__(self, graph = None, size = (600, 600), nodedrawfunction = None):
+    def __init__(self, graph = None, size = (800, 600), nodedrawfunction = None, vertexdrawfunction = None):
         if graph == None:
             self.graph = Graph.Graph()
         else:
@@ -65,19 +78,63 @@ class Grapher:
         else:
             self.nodedrawfunction = nodedrawfunction
 
+        if vertexdrawfunction == None:
+            self.vertexdrawfunction = self.defaultvertexdrawfunction
+        else:
+            self.vertexdrawfunction = vertexdrawfunction
+
         self.camera = Camera()
+        self.backgrounddrawfunction = self.defaultbackgrounddrawfunction
+        self.foregrounddrawfunction = self.defaultforegrounddrawfunction
             
 
     def setGraph(self, graph):
         self.graph = graph
 
+
     def setNodeDrawFunction(self, nodedrawfunction):
         self.nodedrawfunction = nodedrawfunction
+
+    def setVertexDrawFunction(self, vertexdrawfunction):
+        self.vertexdrawfunction = vertexdrawfunction
+
+    def setBackgroundDrawFunction(self, backgrounddrawfunction):
+        self.backgrounddrawfunction = backgrounddrawfunction
+
+    def setForegroundDrawFunction(self, foregrounddrawfunction):
+        self.foregrounddrawfunction = foregrounddrawfunction
+
 
     def getEvents(self):
         e = self._eventslist[:]
         self._eventslist = []
         return e
+
+    
+    #gets the mosue position considering the camera position
+    def getRelativeMousePosition(self):
+        p = pygame.mouse.get_pos()
+        return (p[0] + self.camera.position[0], p[1] + self.camera.position[1])
+
+
+    def start(self):
+        self._thread = Thread(target = self._run)
+        self._thread.start()
+
+
+    def _processInput(self):
+        for event in pygame.event.get():
+                if event.type == QUIT:
+                    print "QUITTING: CLOSE BUTTON HAS BEEN CLICKED..."
+                    self._quit = True
+                elif event.type == MOUSEBUTTONDOWN:
+                    self._processMouseButtonClick(event)
+                elif event.type == MOUSEBUTTONUP:
+                    self._processMouseButtonRelease(event)
+                elif event.type == MOUSEMOTION:
+                        self._processMouseMovement(event)
+                elif event.type == KEYDOWN:
+                    self._eventslist = self._eventslist + [event]
 
     def _processMouseButtonClick(self, event):
         if self._mousemode == 0 and event.button == 1:
@@ -97,8 +154,7 @@ class Grapher:
 
         elif event.button == 3:
             self._eventslist = self._eventslist + [(1, event.button)] #the code to add an event to the event queue will go here
-                        
-                    
+             
 
     def _processMouseButtonRelease(self, event):
         if event.button == 1:
@@ -119,76 +175,45 @@ class Grapher:
         self._lastmousepos = pygame.mouse.get_pos()
 
 
-    #gets the mosue position considering the camera position
-    def getRelativeMousePosition(self):
-        p = pygame.mouse.get_pos()
-        return (p[0] + self.camera.position[0], p[1] + self.camera.position[1])
-        
-    def start(self):
-        self._thread = Thread(target = self._run)
-        self._thread.start()
-
     #the main function which will be run in a separate thread
     def _run(self):
         self.running = True
+
+        #setting up the pygame window
         pygame.init()
-        screen = pygame.display.set_mode((800, 600))
-
-        background = pygame.Surface(screen.get_size())
-        background = background.convert()
-        background.fill((20, 20, 20))
-
-
-        #Blit everything to the screen
-        screen.blit(background, (0, 0))
-        pygame.display.flip()
+        screen = pygame.display.set_mode(self.size)
 
         #The main loop
         while not self._quit:
 
-            self.graph.lock("grapher")
+            #locking the graph datastructure so that it canot be changed while we iterate over it
+            self.graph.lock()
 
             #Processing mouse and key events
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    print "QUITTING: CLOSE BUTTON HAS BEEN CLICKED..."
-                    self._quit = True
-                elif event.type == MOUSEBUTTONDOWN:
-                    self._processMouseButtonClick(event)
-                elif event.type == MOUSEBUTTONUP:
-                    self._processMouseButtonRelease(event)
-                elif event.type == MOUSEMOTION:
-                        self._processMouseMovement(event)
-                elif event.type == KEYDOWN:
-                    self._eventslist = self._eventslist + [event]
-        
-            screen.blit(background, (0, 0))
-            
+            self._processInput()
 
-            #Drawing the lines
-            for r in self.graph.relationships: #For every key in relationships set
+            #doing all physics
+            self.graph._doPhysics(1)
+
+            #doing all drawing
+            self.backgrounddrawfunction(screen, self.camera.position)
+            
+            for r in self.graph.relationships: #drawing lines
                 for i in self.graph.relationships[r][0]:
                     start = (self.graph.nodes[r].position[0]-self.camera.position[0], self.graph.nodes[r].position[1]-self.camera.position[1])
                     end = (self.graph.nodes[i].position[0]-self.camera.position[0], self.graph.nodes[i].position[1]-self.camera.position[1])
-                    pygame.draw.aaline(
-                                    screen,
-                                    (255, 255, 255),
-                                    start,
-                                    end,
-                                    1)
+                    self.vertexdrawfunction(screen, start, end) #we account for the camera position before passing it to the draw method
 
-            #drawing the nodes
-            for n in self.graph.nodes.values():
+            for n in self.graph.nodes.values(): #drawing nodes
                 self.nodedrawfunction(screen, n, self.graph, self.camera.position)
 
-            self.graph.doPhysics(1)
+            pygame.display.flip()
 
-            self.graph.unlock("grapher")
+            #unlocking the graph to allow other threads to use/edit it
+            self.graph.unlock()
             
             time.sleep(0.02)
 	
-            pygame.display.flip()
-
         self.running = False
 
 
