@@ -29,6 +29,8 @@ class Node:
     position = (0.0, 0.0)
     velocity = (0.0, 0.0)
     acceleration = (0.0, 0.0)
+
+    _forcelist = []
     
     mass = 0.25
     static = False
@@ -84,10 +86,10 @@ class Node:
         return map(self.calculateAttractiveForce, nodeslist)
 
     def calculateRepulsiveForces(self, nodeslist):
-        return map(self.calculateRepulsiveForces, nodeslist)
+        return map(self.calculateRepulsiveForce, nodeslist)
 
     def applyForce(self, force):
-        self.acceleration = (self.acceleration[0] + force[0]/self.mass, self.acceleration[1] + force[1]/self.mass)
+        self._forcelist = self._forcelist + [force]
 
     def applyForces(self, forcelist):
         map(applyforce, forcelist)
@@ -97,7 +99,11 @@ class Node:
         if not self.static:
             fractiontomove = timeinterval/1000.0
 
+            for f in self._forcelist:
+                self.acceleration = (self.acceleration[0] + (f[0]/self.mass)*fractiontomove, self.acceleration[1] + (f[1]/self.mass)*fractiontomove)
+
             self.velocity = (self.velocity[0] + self.acceleration[0]*fractiontomove, self.velocity[1] + self.acceleration[1]*fractiontomove)
             self.velocity = (self.velocity[0]*Grapher.FRICTION_COEFFICIENT, self.velocity[1]*Grapher.FRICTION_COEFFICIENT)
             self.position = (self.position[0] + self.velocity[0]*fractiontomove, self.position[1] + self.velocity[1]*fractiontomove)
         self.acceleration = (0, 0)
+        self._forcelist = []

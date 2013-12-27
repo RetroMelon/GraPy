@@ -16,10 +16,10 @@ import random
 from threading import *
 
 #some constants that the user can change in order to change the way the nodes act
-ATTRACTIVE_FORCE_CONSTANT = 10000
-REPULSIVE_FORCE_CONSTANT = 30000000
-MINIMUM_SPRING_SIZE = 65
-FRICTION_COEFFICIENT = 0.85
+ATTRACTIVE_FORCE_CONSTANT = 10000 #10000
+REPULSIVE_FORCE_CONSTANT = 1000000 #30000000
+MINIMUM_SPRING_SIZE = 65 #65
+FRICTION_COEFFICIENT = 0.75 #0.85
 
 #the nodes have a radius, but for the purposes of speed/efficiency, we do a bounding box collision detection
 def checkCollision(node, pos):
@@ -60,7 +60,7 @@ class Grapher:
 
     running = False
     _quit = False #this can be changed using the stop() function with either another thread or the exit button at the top of the screen. When it does, the while loop in the thread breaks
-    _framerate = 100
+    _framerate = 50
     _frametime = 1000/_framerate #this is the time the current frame took to execute
     
     _thread = None
@@ -72,7 +72,7 @@ class Grapher:
     
     _eventslist = []
 
-    def __init__(self, graph = None, size = (800, 600), nodedrawfunction = None, vertexdrawfunction = None, framerate = 100):
+    def __init__(self, graph = None, size = (800, 600), nodedrawfunction = None, vertexdrawfunction = None, framerate = 50):
         if graph == None:
             self.graph = Graph.Graph()
         else:
@@ -148,6 +148,7 @@ class Grapher:
                     self._processMouseButtonRelease(event)
                 elif event.type == MOUSEMOTION:
                         self._processMouseMovement(event)
+        pygame.event.clear()
                         
 
     def _processMouseButtonClick(self, event):
@@ -212,7 +213,7 @@ class Grapher:
         while not self._quit:
             framecount = framecount + 1
             self._frametime = frameclock.tick_busy_loop(self._framerate)
-            print "frametime:", self._frametime
+            
             #locking the graph datastructure so that it canot be changed while we iterate over it
             self.graph.lock()
 
@@ -223,7 +224,7 @@ class Grapher:
 
             starttime = time.clock()
             #doing all physics
-            self.graph._doPhysics(1)
+            self.graph._doPhysics(self._frametime)
             physicstime = time.clock() - starttime
 
             starttime = time.clock()
@@ -247,6 +248,7 @@ class Grapher:
 
             if(framecount%100 == 0):
                 print "TIMES:  ", "Input", inputtime, "   Physics", physicstime, "   Draw", drawtime
+                print "frametime:", self._frametime
                 framecount = 0
 	
         self.running = False
