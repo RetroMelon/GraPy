@@ -15,6 +15,11 @@ import time
 import random
 from threading import *
 
+#some constants that the user can change in order to change the way the nodes act
+ATTRACTIVE_FORCE_CONSTANT = 10000
+REPULSIVE_FORCE_CONSTANT = 30000000
+MINIMUM_SPRING_SIZE = 65
+FRICTION_COEFFICIENT = 0.85
 
 #the nodes have a radius, but for the purposes of speed/efficiency, we do a bounding box collision detection
 def checkCollision(node, pos):
@@ -55,7 +60,9 @@ class Grapher:
 
     running = False
     _quit = False #this can be changed using the stop() function with either another thread or the exit button at the top of the screen. When it does, the while loop in the thread breaks
-
+    _framerate = 100
+    _frametime = 1000/_framerate #this is the time the current frame took to execute
+    
     _thread = None
 
     _mousemode = 0 # 0 - the mouse is unclicked and not performing any tasks, 1 - the mouse is controlling a node, 2 - the mouse is controlling the camera
@@ -65,7 +72,7 @@ class Grapher:
     
     _eventslist = []
 
-    def __init__(self, graph = None, size = (800, 600), nodedrawfunction = None, vertexdrawfunction = None):
+    def __init__(self, graph = None, size = (800, 600), nodedrawfunction = None, vertexdrawfunction = None, framerate = 100):
         if graph == None:
             self.graph = Graph.Graph()
         else:
@@ -86,6 +93,7 @@ class Grapher:
         self.camera = Camera()
         self.backgrounddrawfunction = self.defaultbackgrounddrawfunction
         self.foregrounddrawfunction = self.defaultforegrounddrawfunction
+        _framerate = framerate
             
 
     def setGraph(self, graph):
@@ -199,9 +207,12 @@ class Grapher:
         screen = pygame.display.set_mode(self.size)
 
         framecount = 0
+        frameclock = pygame.time.Clock()
         #The main loop
         while not self._quit:
             framecount = framecount + 1
+            self._frametime = frameclock.tick_busy_loop(self._framerate)
+            print "frametime:", self._frametime
             #locking the graph datastructure so that it canot be changed while we iterate over it
             self.graph.lock()
 
@@ -237,8 +248,6 @@ class Grapher:
             if(framecount%100 == 0):
                 print "TIMES:  ", "Input", inputtime, "   Physics", physicstime, "   Draw", drawtime
                 framecount = 0
-    
-            time.sleep(0.02)
 	
         self.running = False
 

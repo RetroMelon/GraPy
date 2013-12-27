@@ -1,5 +1,6 @@
 import Node
 import threading
+from Debug import *
 #The graph object contains a bunch of nodes and is responsible for maintaining
 #the datastructure of nodes. and having physics act upon them
 
@@ -35,7 +36,7 @@ class Graph:
     #takes the ID of a node to remove
     def removeNode(self, nodeID):
         if not nodeID in self.nodes:
-            print "TRIED TO REMOVE NODE", nodeID, "WHICH DIDN'T EXIST."
+            DebugMsg("TRIED TO REMOVE NODE "+str(nodeID)+" WHICH DIDN'T EXIST.")
             return
         
         for outgoingrelation in self.relationships[nodeID][0]:
@@ -53,10 +54,10 @@ class Graph:
     #takes the IDs of the outgoing and imconing nodes
     def removeRelationship(self, outgoing, incoming):
         if (not outgoing in self.relationships):
-            print "TRIED TO REMOVE RELATIONSHIP", outgoing, " > ", incoming, "WHEN OUTGOING DIDN'T EXIST."
+            DebugMsg("TRIED TO REMOVE RELATIONSHIP "+str(outgoing)+"  >  "+str(incoming)+" WHEN OUTGOING DIDN'T EXIST.")
             return
         if (not incoming in self.relationships):
-            print "TRIED TO REMOVE RELATIONSHIP", outgoing, " > ", incoming, "WHEN INCOMING DIDN'T EXIST."
+            DebugMsg("TRIED TO REMOVE RELATIONSHIP "+str(outgoing)+"  >  "+str(incoming)+" WHEN INCOMING DIDN'T EXIST.")
             return
         
         self.relationships[outgoing][0].remove(incoming)
@@ -66,16 +67,16 @@ class Graph:
     #adds a directional relationship to the graph between nodes
     def addRelationship(self, outgoing, incoming):
         if (not outgoing in self.relationships):
-            print "TRIED TO ADD RELATIONSHIP", outgoing, " > ", incoming, "WHEN OUTGOING DIDN'T EXIST."
+            DebugMsg("TRIED TO ADD RELATIONSHIP "+str(outgoing)+"  >  "+str(incoming)+" WHEN OUTGOING DIDN'T EXIST.")
             return
         if (not incoming in self.relationships):
-            print "TRIED TO ADD RELATIONSHIP", outgoing, " > ", incoming, "WHEN INCOMING DIDN'T EXIST."
+            DebugMsg("TRIED TO ADD RELATIONSHIP "+str(outgoing)+"  >  "+str(incoming)+" WHEN INCOMING DIDN'T EXIST.")
             return
         if (outgoing == incoming):
-            print "TRIED TO ADD RELATIONSHIP BETWEEN NODE", outgoing, "AND ITSELF."
+            DebugMsg("TRIED TO ADD RELATIONSHIP BETWEEN NODE "+str(outgoing)+" AND ITSELF.")
             return
         if (incoming in self.relationships[outgoing][0]):
-            print "RELATIONSHIP", outgoing, " > ", incoming, "ALREADY EXISTS."
+            DebugMsg("RELATIONSHIP "+str(outgoing)+"  >  "+str(incoming)+" ALREADY EXISTS.")
             return
 
         #adding the relationships in the appropriate locations

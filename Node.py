@@ -1,18 +1,14 @@
 import math
+import Grapher
 #the node class is one that has a UID, and some physical properties to define its location in space.
 #the node class knows only of itself, so has no knowledge of which nodes it is connected to.
 #it calculates all forces that would act upon itself, never forces that would act upon another node.
-
-attractiveForceConstant = 10000
-repulsiveForceConstant = 30000000
-minSpringSize = 65
-frictionCoefficient = 0.85
 
 #def finds the distance as a scalar (the hypot of the x and y positions
 def findDistance(node1, node2):
     d = math.hypot((node2.position[0] - node1.position[0]), (node2.position[1] - node1.position[1]))
     
-    n = 0.000002 * repulsiveForceConstant
+    n = 0.000002 * Grapher.REPULSIVE_FORCE_CONSTANT
 
     if d < n: #this prevents the distance being tiny and the nodes flying off in to infinity
         d = n
@@ -28,6 +24,7 @@ def findAngle(node1, node2):
 class Node:
 
     UID = ""
+    data = []
     
     position = (0.0, 0.0)
     velocity = (0.0, 0.0)
@@ -68,7 +65,7 @@ class Node:
     #calculates the total value of the attractive force
     def _calcAttractiveForceMagnitude(self, other):
         distance = findDistance(self, other)
-        return attractiveForceConstant * (distance - minSpringSize) #we should perhaps add in a minimum string length later on.
+        return Grapher.ATTRACTIVE_FORCE_CONSTANT * (distance - Grapher.MINIMUM_SPRING_SIZE) #we should perhaps add in a minimum string length later on.
 
     def calculateRepulsiveForce(self, other):
         forcemagnitude = self._calcRepulsiveForceMagnitude(other)
@@ -81,7 +78,7 @@ class Node:
 
     def _calcRepulsiveForceMagnitude(self, other):
         distancetuple = findDistanceTuple(self, other)
-        return -repulsiveForceConstant*1.0*(self.charge * other.charge)/findDistance(self, other)**2#(1.0*(distancetuple[0]**2 + distancetuple[1]**2))
+        return -Grapher.REPULSIVE_FORCE_CONSTANT*1.0*(self.charge * other.charge)/findDistance(self, other)**2
 
     def calculateAttractiveForces(self, nodeslist):
         return map(self.calculateAttractiveForce, nodeslist)
@@ -101,6 +98,6 @@ class Node:
             fractiontomove = timeinterval/1000.0
 
             self.velocity = (self.velocity[0] + self.acceleration[0]*fractiontomove, self.velocity[1] + self.acceleration[1]*fractiontomove)
-            self.velocity = (self.velocity[0]*frictionCoefficient, self.velocity[1]*frictionCoefficient)
+            self.velocity = (self.velocity[0]*Grapher.FRICTION_COEFFICIENT, self.velocity[1]*Grapher.FRICTION_COEFFICIENT)
             self.position = (self.position[0] + self.velocity[0]*fractiontomove, self.position[1] + self.velocity[1]*fractiontomove)
         self.acceleration = (0, 0)
