@@ -10,17 +10,16 @@
 import Graph
 import Node
 import pygame
-import math
 from pygame.locals import *
 import time
 import random
 from threading import *
 
 #some constants that the user can change in order to change the way the nodes act
-ATTRACTIVE_FORCE_CONSTANT = 50 #10000
-REPULSIVE_FORCE_CONSTANT = 1000 #30000000
+ATTRACTIVE_FORCE_CONSTANT = 10 #10000
+REPULSIVE_FORCE_CONSTANT = 100000 #30000000
 MINIMUM_SPRING_SIZE = 65 #65
-FRICTION_COEFFICIENT = 15 #4 #larger number means it loses all of its energy more quickly. #an extremely large number (more than 50 or 75 can cause crashing due to great accelerations)
+FRICTION_COEFFICIENT = 4 #0.85 #larger number means it loses all of its energy more quickly.
 
 #the nodes have a radius, but for the purposes of speed/efficiency, we do a bounding box collision detection
 def checkCollision(node, pos):
@@ -38,16 +37,7 @@ class Grapher:
 
     #all draw functions must take a screen, node and camera position (as tuple)
     def defaultnodedrawfunction(self, screen, node, graph, cameraposition):
-        intpos = (int(node.position[0]), int(node.position[1]))
-        relationships = len(graph.relationships[node.UID][0]) + len(graph.relationships[node.UID][1])
-
-        #n produces a colour gradient between 0 and 254 depending on the number of relationships
-        n = (((1 + 1.0/(0.35*(relationships+1)))**(0.35*relationships)-1)/1.71828)*254 #tends to 254 as relaitonships tend to infinity
-
-        pygame.draw.circle(screen, (int(n), 0, 255-int(n)), (intpos[0]-cameraposition[0], intpos[1]-cameraposition[1]), node.radius, 0)
-
-        f = pygame.font.Font(None, 20).render(node.UID, 1, (255, 255, 255))
-        screen.blit(f, (node.position[0]-cameraposition[0]-5, node.position[1]-cameraposition[1]-5))
+        pass
 
     def defaultvertexdrawfunction(self, screen, start, end):
         pygame.draw.aaline(screen, (255, 255, 255), start, end, 1)
@@ -104,10 +94,11 @@ class Grapher:
         self.backgrounddrawfunction = self.defaultbackgrounddrawfunction
         self.foregrounddrawfunction = self.defaultforegrounddrawfunction
         _framerate = framerate
-
+            
 
     def setGraph(self, graph):
         self.graph = graph
+
 
     def setNodeDrawFunction(self, nodedrawfunction):
         self.nodedrawfunction = nodedrawfunction

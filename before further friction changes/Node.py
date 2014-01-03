@@ -28,13 +28,13 @@ class Node:
 
     _forcelist = []
     
-    mass = 1
+    mass = 0.25
     static = False
     charge = 1.0
 
     radius = 9
 
-    def __init__(self, uid, position = (0.0, 0.0), velocity = (0.0, 0.0), mass = 0.25, static = False, charge = 10, boundingbox = ((-5, -5), (5, 5)), neighbours = []):
+    def __init__(self, uid, position = (0.0, 0.0), velocity = (0.0, 0.0), mass = 0.5, static = False, charge = 10, boundingbox = ((-5, -5), (5, 5)), neighbours = []):
         self.UID = uid
         self.position = position
         self.velocity = velocity
@@ -75,12 +75,12 @@ class Node:
         return (forcex, forcey)
 
     
-    #a function similar to that of gravitation; a parabolic fall off. the distance^2 + charge*charge part means it can never exceed the repulsive force constant
+
     def _calcRepulsiveForceMagnitude(self, other):
         distance = findDistance(self, other)
-        if distance<15:
-            distance = 15
-        return -Grapher.REPULSIVE_FORCE_CONSTANT*1.0*(self.charge * other.charge)/((distance*0.2)**2 + (self.charge * other.charge))
+        if distance < 20:
+            return -100
+        return -Grapher.REPULSIVE_FORCE_CONSTANT*1.0*(self.charge * other.charge)/distance**2
 
     def calculateAttractiveForces(self, nodeslist):
         return map(self.calculateAttractiveForce, nodeslist)
@@ -94,27 +94,21 @@ class Node:
     def applyForces(self, forcelist):
         map(applyforce, forcelist)
 
-    #calculates and applies a frictional force to the 
-    def calculateFrictionalForce(self):
-        return (self.velocity[0]*-Grapher.FRICTION_COEFFICIENT*self.mass, self.velocity[1]*-Grapher.FRICTION_COEFFICIENT*self.mass)
-        
-        
     #time interval is expressed in milliseconds
     def move(self, timeinterval):
         if not self.static:
             fractiontomove = timeinterval/1000.0
-            if fractiontomove > 0.2:
-                fractiontomove = 0.2
-
-            self.applyForce(self.calculateFrictionalForce())
-
-            totalforce = (0, 0)
             for f in self._forcelist:
-                totalforce = (totalforce[0] + f[0], totalforce[1] + f[1])
-                
-            self.acceleration = (self.acceleration[0] + (totalforce[0]/self.mass), self.acceleration[1] + (totalforce[1]/self.mass))
+                self.acceleration = (self.acceleration[0] + (f[0]/self.mass), self.acceleration[1] + (f[1]/self.mass))
 
             self.velocity = (self.velocity[0] + self.acceleration[0]*fractiontomove, self.velocity[1] + self.acceleration[1]*fractiontomove)
+
+            changeduetofriction = ((self.velocity[0]*Grapher.FRICTION_COEFFICIENT)*fractiontomove, (self.velocity[1]*Grapher.FRICTION_COEFFICIENT)*fractiontomove)
+            if changeduetofriction[0] > self.velocity[0]:
+                changeduetofriction = (self.velocity[0], changeduetofriction[1])
+            if changeduetofriction[1] > self.velocity[1]:
+                changeduetofriction = (changeduetofriction[0], self.velocity[1])
+            self.velocity = (self.velocity[0] - changeduetofriction[0], self.velocity[1] - changeduetofriction[1])
 
             self.position = (self.position[0] + self.velocity[0]*fractiontomove, self.position[1] + self.velocity[1]*fractiontomove)
 
