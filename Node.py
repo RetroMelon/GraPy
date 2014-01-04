@@ -34,7 +34,7 @@ class Node:
 
     radius = 9
 
-    def __init__(self, uid, position = (0.0, 0.0), velocity = (0.0, 0.0), mass = 0.25, static = False, charge = 10, boundingbox = ((-5, -5), (5, 5)), neighbours = []):
+    def __init__(self, uid, position = (0.0, 0.0), velocity = (0.0, 0.0), mass = 1, static = False, charge = 10, boundingbox = ((-5, -5), (5, 5)), neighbours = []):
         self.UID = uid
         self.position = position
         self.velocity = velocity
@@ -94,18 +94,14 @@ class Node:
     def applyForces(self, forcelist):
         map(applyforce, forcelist)
 
-    #calculates and applies a frictional force to the 
+    #calculates the frictional force but does not apply it
     def calculateFrictionalForce(self):
         return (self.velocity[0]*-Grapher.FRICTION_COEFFICIENT*self.mass, self.velocity[1]*-Grapher.FRICTION_COEFFICIENT*self.mass)
         
         
-    #time interval is expressed in milliseconds
-    def move(self, timeinterval):
+    #takes the framerate of the simulation. this should be an unchanging/static framerate, and should ideally not fluctuate
+    def move(self, framerate):
         if not self.static:
-            fractiontomove = timeinterval/1000.0
-            if fractiontomove > 0.2:
-                fractiontomove = 0.2
-
             self.applyForce(self.calculateFrictionalForce())
 
             totalforce = (0, 0)
@@ -114,9 +110,12 @@ class Node:
                 
             self.acceleration = (self.acceleration[0] + (totalforce[0]/self.mass), self.acceleration[1] + (totalforce[1]/self.mass))
 
-            self.velocity = (self.velocity[0] + self.acceleration[0]*fractiontomove, self.velocity[1] + self.acceleration[1]*fractiontomove)
+            self.velocity = (self.velocity[0] + self.acceleration[0]/framerate, self.velocity[1] + self.acceleration[1]/framerate)
 
-            self.position = (self.position[0] + self.velocity[0]*fractiontomove, self.position[1] + self.velocity[1]*fractiontomove)
+            frictionalcoefficient = math.pow(Grapher.FRICTION_COEFFICIENT, 1.0/framerate)
+            self.velocity = (self.velocity[0]*frictionalcoefficient, self.velocity[1]*frictionalcoefficient)
+
+            self.position = (self.position[0] + self.velocity[0]/framerate, self.position[1] + self.velocity[1]/framerate)
 
         self.acceleration = (0.0, 0.0)
         self._forcelist = []

@@ -18,9 +18,10 @@ from threading import *
 
 #some constants that the user can change in order to change the way the nodes act
 ATTRACTIVE_FORCE_CONSTANT = 50 #10000
-REPULSIVE_FORCE_CONSTANT = 1000 #30000000
+REPULSIVE_FORCE_CONSTANT = 10000 #30000000
 MINIMUM_SPRING_SIZE = 65 #65
-FRICTION_COEFFICIENT = 15 #4 #larger number means it loses all of its energy more quickly. #an extremely large number (more than 50 or 75 can cause crashing due to great accelerations)
+FRICTION_COEFFICIENT = 0.0005 #represents how much velocity the node will retain after 1 second
+PER_FRAME_FRICTION_COEFFICIENT = 1 #this will be calculated whenever we change the friction coefficient or framerate
 
 #the nodes have a radius, but for the purposes of speed/efficiency, we do a bounding box collision detection
 def checkCollision(node, pos):
@@ -75,7 +76,8 @@ class Grapher:
     
     _thread = None
 
-    _mousemode = 0 # 0 - the mouse is unclicked and not performing any tasks, 1 - the mouse is controlling a node, 2 - the mouse is controlling the camera
+    # 0 - the mouse is unclicked and not performing any tasks, 1 - the mouse is controlling a node, 2 - the mouse is controlling the camera
+    _mousemode = 0 
     _lastmousepos = (0, 0)
     _clickednode = None
     _clickednodestatic = False
@@ -233,7 +235,7 @@ class Grapher:
 
             starttime = time.clock()
             #doing all physics
-            self.graph._doPhysics(self._frametime)
+            self.graph._doPhysics(self._framerate)
             physicstime = time.clock() - starttime
 
             starttime = time.clock()
