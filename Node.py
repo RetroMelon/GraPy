@@ -112,7 +112,7 @@ class Node:
 
             self.velocity = (self.velocity[0] + self.acceleration[0]/framerate, self.velocity[1] + self.acceleration[1]/framerate)
 
-            frictionalcoefficient = math.pow(Grapher.FRICTION_COEFFICIENT, 1.0/framerate)
+            frictionalcoefficient = Grapher.PER_FRAME_FRICTION_COEFFICIENT
             self.velocity = (self.velocity[0]*frictionalcoefficient, self.velocity[1]*frictionalcoefficient)
 
             self.position = (self.position[0] + self.velocity[0]/framerate, self.position[1] + self.velocity[1]/framerate)

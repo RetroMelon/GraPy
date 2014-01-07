@@ -9,6 +9,7 @@
 
 import Graph
 import Node
+import FramerateAverager
 import pygame
 import math
 from pygame.locals import *
@@ -71,8 +72,11 @@ class Grapher:
 
     running = False
     _quit = False #this can be changed using the stop() function with either another thread or the exit button at the top of the screen. When it does, the while loop in the thread breaks
-    _framerate = 50
-    _frametime = 1000/_framerate #this is the time the current frame took to execute
+
+    _targetframerate = 50
+    _realframerate = _targetframerate
+    _frametime = 1000/_targetframerate #this is the time the current frame took to execute
+    _frameaverager = None    
     
     _thread = None
 
@@ -105,7 +109,9 @@ class Grapher:
         self.camera = Camera()
         self.backgrounddrawfunction = self.defaultbackgrounddrawfunction
         self.foregrounddrawfunction = self.defaultforegrounddrawfunction
-        _framerate = framerate
+
+        self._frameaverager = FramerateAverager.FramerateAverager()
+        _targetframerate = framerate
 
 
     def setGraph(self, graph):
@@ -142,6 +148,11 @@ class Grapher:
                 if checkCollision(self.graph.nodes[n], position):
                     return n
         return None
+
+    #calculates the frictional coefficient for the frame, and changes the global variable
+    def _calculateFrictionCoefficient(self, framerate):
+        global PER_FRAME_FRICTION_COEFFICIENT
+        PER_FRAME_FRICTION_COEFFICIENT = math.pow(FRICTION_COEFFICIENT, 1.0/framerate)
 
     def start(self):
         self._thread = Thread(target = self._run)
@@ -223,8 +234,12 @@ class Grapher:
         #The main loop
         while not self._quit:
             framecount = framecount + 1
-            self._frametime = frameclock.tick_busy_loop(self._framerate)
-            
+            self._frametime = frameclock.tick_busy_loop(self._targetframerate)
+
+            #adding a new frametime to the frameaverager and getting the average framerate
+            self._frameaverager.addFrametime(self._frametime)
+            self._realframerate = self._frameaverager.getAverageFramerate()
+            print "realframerate:", self._realframerate
             #locking the graph datastructure so that it canot be changed while we iterate over it
             self.graph.lock()
 
@@ -235,7 +250,8 @@ class Grapher:
 
             starttime = time.clock()
             #doing all physics
-            self.graph._doPhysics(self._framerate)
+            self._calculateFrictionCoefficient(self._realframerate)
+            self.graph._doPhysics(self._realframerate)#self._realframerate)
             physicstime = time.clock() - starttime
 
             starttime = time.clock()
@@ -249,7 +265,7 @@ class Grapher:
                     self.vertexdrawfunction(screen, start, end) #we account for the camera position before passing it to the draw method
 
             for n in self.graph.nodes.values(): #drawing nodes
-                self.nodedrawfunction(screen, n, self.graph, self.camera.position)
+                self.nodedrawfunction(screen, n, self.graph, (int(self.camera.position[0]), int(self.camera.position[1])))
 
             pygame.display.flip()
 

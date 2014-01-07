@@ -84,16 +84,16 @@ class Graph:
         self.relationships[incoming][1] = self.relationships[incoming][1] + [outgoing]
 
 
-    #the function that does all of the physics calculations. timeinterval is in miliseconds
+    #the function that does all of the physics calculations. takes framerate
     #we do the following things:
         #calculate and apply attractive forces
         #calculate and apply repulsive forces
         #move each node
-    def _doPhysics(self, timeinterval):
+    def _doPhysics(self, framerate):
         self._calculateAttractiveForces()
         self._calculateRepulsiveForces()
 
-        self._moveAllNodes(timeinterval)
+        self._moveAllNodes(framerate)
 
 
     #we go through every outgoing relationship, and for each one apply a force to both the outgoing node and incoming
@@ -112,9 +112,9 @@ class Graph:
                 fx, fy = node.calculateRepulsiveForce(node2)
                 node.applyForce((fx, fy))
                 node2.applyForce((-fx, -fy))
-                
+
 
     #applies each node's forces to it
-    def _moveAllNodes(self, timeinterval):
+    def _moveAllNodes(self, framerate):
         for n in self.nodes.values():
-            n.move(timeinterval)
+            n.move(framerate)
