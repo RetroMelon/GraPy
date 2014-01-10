@@ -79,15 +79,16 @@ def mainthread():
                     #we are going to add relationships between every node this one is connected to to each other as long as they don't already have them
                     graph.lock()
                     n = e[2]#the UID of the node clicked
-                    allrelationships = graph.relationships[n][0] + graph.relationships[n][1]
-                    for relatednode in allrelationships:
-                        for relatednode2 in allrelationships:
-                            if relatednode == relatednode2:
-                                continue
-                            else: #if the nodes do not currently have a relationship with oneanother, add one
-                                if (not relatednode2 in graph.relationships[relatednode][0]) and (not relatednode2 in graph.relationships[relatednode][1]):
-                                    graph.addRelationship(relatednode, relatednode2)
-                    graph.removeNode(n)
+                    if n in graph.relationships: #we need to check if it exists in the relationships dictionary because there is a chance it has been deleted since the event was generated
+                        allrelationships = graph.relationships[n][0] + graph.relationships[n][1]
+                        for relatednode in allrelationships:
+                            for relatednode2 in allrelationships:
+                                if relatednode == relatednode2:
+                                    continue
+                                else: #if the nodes do not currently have a relationship with oneanother, add one
+                                    if (not relatednode2 in graph.relationships[relatednode][0]) and (not relatednode2 in graph.relationships[relatednode][1]):
+                                        graph.addRelationship(relatednode, relatednode2)
+                        graph.removeNode(n)
                     graph.unlock()
                     
         time.sleep(0.2)
