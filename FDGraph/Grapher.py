@@ -9,17 +9,20 @@
 
 import Graph
 import Node
+import FramerateAverager
 import pygame
+import math
 from pygame.locals import *
 import time
 import random
 from threading import *
 
 #some constants that the user can change in order to change the way the nodes act
-ATTRACTIVE_FORCE_CONSTANT = 10 #10000
-REPULSIVE_FORCE_CONSTANT = 100000 #30000000
+ATTRACTIVE_FORCE_CONSTANT = 50 #10000
+REPULSIVE_FORCE_CONSTANT = 10000 #30000000
 MINIMUM_SPRING_SIZE = 65 #65
-FRICTION_COEFFICIENT = 4 #0.85 #larger number means it loses all of its energy more quickly.
+FRICTION_COEFFICIENT = 0.0005 #represents how much velocity the node will retain after 1 second
+PER_FRAME_FRICTION_COEFFICIENT = 1 #this will be calculated whenever we change the friction coefficient or framerate
 
 #the nodes have a radius, but for the purposes of speed/efficiency, we do a bounding box collision detection
 def checkCollision(node, pos):
@@ -33,11 +36,27 @@ def checkCollision(node, pos):
         return False
     return True
 
+#takes two tuples with two values each, and returns a tuple with the value t1+t2
+def tupleAdd(tuple1, tuple2):
+    return (tuple1[0]+tuple2[0], tuple1[1]+tuple2[1])
+
+#takes two tuples with two values each, and returns a tuple with the value t1-t2
+def tupleSubtract(tuple1, tuple2):
+    return (tuple1[0]-tuple2[0], tuple1[1]-tuple2[1])
+
 class Grapher:
 
-    #all draw functions must take a screen, node and camera position (as tuple)
-    def defaultnodedrawfunction(self, screen, node, graph, cameraposition):
-        pass
+    #all draw functions must take a screen, node and the position of the node as a tuple after compensation for the camera's position
+    def defaultnodedrawfunction(self, screen, node, graph, position):
+        relationships = len(graph.relationships[node.UID][0]) + len(graph.relationships[node.UID][1])
+
+        #n produces a colour gradient between 0 and 254 depending on the number of relationships
+        n = (((1 + 1.0/(0.35*(relationships+1)))**(0.35*relationships)-1)/1.71828)*254 #tends to 254 as relaitonships tend to infinity
+
+        pygame.draw.circle(screen, (int(n), 0, 255-int(n)), position, node.radius, 0)
+
+        f = pygame.font.Font(None, 20).render(node.UID, 1, (255, 255, 255))
+        screen.blit(f, tupleSubtract(position, (5, 5)))#blitting the text with a 5 pixel offset
 
     def defaultvertexdrawfunction(self, screen, start, end):
         pygame.draw.aaline(screen, (255, 255, 255), start, end, 1)
@@ -60,12 +79,16 @@ class Grapher:
 
     running = False
     _quit = False #this can be changed using the stop() function with either another thread or the exit button at the top of the screen. When it does, the while loop in the thread breaks
-    _framerate = 50
-    _frametime = 1000/_framerate #this is the time the current frame took to execute
+
+    _targetframerate = 50
+    _realframerate = _targetframerate
+    _frametime = 1000/_targetframerate #this is the time the current frame took to execute
+    _frameaverager = None    
     
     _thread = None
 
-    _mousemode = 0 # 0 - the mouse is unclicked and not performing any tasks, 1 - the mouse is controlling a node, 2 - the mouse is controlling the camera
+    # 0 - the mouse is unclicked and not performing any tasks, 1 - the mouse is controlling a node, 2 - the mouse is controlling the camera
+    _mousemode = 0 
     _lastmousepos = (0, 0)
     _clickednode = None
     _clickednodestatic = False
@@ -93,12 +116,13 @@ class Grapher:
         self.camera = Camera()
         self.backgrounddrawfunction = self.defaultbackgrounddrawfunction
         self.foregrounddrawfunction = self.defaultforegrounddrawfunction
-        _framerate = framerate
-            
+
+        self._frameaverager = FramerateAverager.FramerateAverager()
+        _targetframerate = framerate
+
 
     def setGraph(self, graph):
         self.graph = graph
-
 
     def setNodeDrawFunction(self, nodedrawfunction):
         self.nodedrawfunction = nodedrawfunction
@@ -131,6 +155,11 @@ class Grapher:
                 if checkCollision(self.graph.nodes[n], position):
                     return n
         return None
+
+    #calculates the frictional coefficient for the frame, and changes the global variable
+    def _calculateFrictionCoefficient(self, framerate):
+        global PER_FRAME_FRICTION_COEFFICIENT
+        PER_FRAME_FRICTION_COEFFICIENT = math.pow(FRICTION_COEFFICIENT, 1.0/framerate)
 
     def start(self):
         self._thread = Thread(target = self._run)
@@ -212,8 +241,11 @@ class Grapher:
         #The main loop
         while not self._quit:
             framecount = framecount + 1
-            self._frametime = frameclock.tick_busy_loop(self._framerate)
-            
+            self._frametime = frameclock.tick_busy_loop(self._targetframerate)
+
+            #adding a new frametime to the frameaverager and getting the average framerate
+            self._frameaverager.addFrametime(self._frametime)
+            self._realframerate = self._frameaverager.getAverageFramerate()
             #locking the graph datastructure so that it canot be changed while we iterate over it
             self.graph.lock()
 
@@ -224,7 +256,8 @@ class Grapher:
 
             starttime = time.clock()
             #doing all physics
-            self.graph._doPhysics(self._frametime)
+            self._calculateFrictionCoefficient(self._realframerate)
+            self.graph._doPhysics(self._realframerate)#self._realframerate)
             physicstime = time.clock() - starttime
 
             starttime = time.clock()
@@ -238,7 +271,8 @@ class Grapher:
                     self.vertexdrawfunction(screen, start, end) #we account for the camera position before passing it to the draw method
 
             for n in self.graph.nodes.values(): #drawing nodes
-                self.nodedrawfunction(screen, n, self.graph, self.camera.position)
+                pos = tupleSubtract(n.position, self.camera.position)
+                self.nodedrawfunction(screen, n, self.graph, (int(pos[0]), int(pos[1])))
 
             pygame.display.flip()
 
@@ -247,9 +281,10 @@ class Grapher:
             self.graph.unlock()
 
             #the slow print statements cause frametime abnormalities leading to bizarre node behaviour
-            if(framecount%100 == 0):
+            if(framecount%200 == 0):
                 print "TIMES:  ", "Input", inputtime, "   Physics", physicstime, "   Draw", drawtime
                 print "frametime:", self._frametime
+                print "framerate used in calculation:", self._realframerate
                 framecount = 0
 	
         self.running = False

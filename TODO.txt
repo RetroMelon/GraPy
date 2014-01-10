@@ -12,5 +12,6 @@ D	*add ability to store data along with each node
 D	*Make a framerate timer and fix friction so it acts correctly for different frame rates
 	*make a proper read-me file and tutorials
 	*change methods to be absolutely clear what they do
-	*change file locations so they're nicely formatted in to a library
+D	*change file locations so they're nicely formatted in to a library
 	*change draw function so a parameter is the camera-compensated position
+D	*fix tester.py so it doesn't leave behind a thread that chews up CPU usage when closed

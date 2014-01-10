@@ -1,9 +1,9 @@
-import Grapher
-import Graph
-import Node
+from FDGraph import *
+##import Grapher
+##import Graph
+##import Node
 import random
 import time
-import pygame
 import math
 import threading
 
@@ -16,8 +16,7 @@ g = Grapher.Grapher(graph = graph)
 #takes a graph and a grapher (g)
 def mainthread():
     global graph, g, lastnodeadded
-    Quit = False
-    while not Quit:
+    while g.running:
         events = g.getEvents()
         for e in events:
             print "recieved event:", e
@@ -42,25 +41,13 @@ def mainthread():
                     else:
                         graph.addRelationship(str(lastnodeadded), str(lastnodeadded-1))
                     graph.unlock()
-    time.sleep(0.2)
+        time.sleep(0.2)
+    print "FDGRAPHER HAS FINISHED. QUITTING MAIN THREAD..."
 
-def drawfunction(screen, node, graph, cameraposition):
-    intpos = (int(node.position[0]), int(node.position[1]))
-    relationships = len(graph.relationships[node.UID][0]) + len(graph.relationships[node.UID][1])
-
-    #n produces a colour gradient between 0 and 254 depending on the number of relationships
-    n = (((1 + 1.0/(0.35*(relationships+1)))**(0.35*relationships)-1)/1.71828)*254 #tends to 254 as relaitonships tend to infinity
-
-    pygame.draw.circle(screen, (int(n), 0, 255-int(n)), (intpos[0]-cameraposition[0], intpos[1]-cameraposition[1]), node.radius, 0)
-
-    f = pygame.font.Font(None, 20).render(node.UID, 1, (255, 255, 255))
-    screen.blit(f, (node.position[0]-cameraposition[0]-5, node.position[1]-cameraposition[1]-5))
-
+    
 
 lastnodeadded = lastnodeadded + 1
 graph.addNode(Node.Node(str(lastnodeadded), position = (300, 300)))
-
-g.setNodeDrawFunction(drawfunction)
 
 g.start()
 

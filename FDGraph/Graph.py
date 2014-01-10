@@ -38,8 +38,10 @@ class Graph:
         if not nodeID in self.nodes:
             DebugMsg("TRIED TO REMOVE NODE "+str(nodeID)+" WHICH DIDN'T EXIST.")
             return
+
+        outgoings = self.relationships[nodeID][0][:]
         
-        for outgoingrelation in self.relationships[nodeID][0]:
+        for outgoingrelation in outgoings:
             self.removeRelationship(nodeID, outgoingrelation)
 
         incomings = self.relationships[nodeID][1][:]
