@@ -1,7 +1,5 @@
+from FDGraph import *
 import random
-import Node
-import Graph
-import Grapher
 
 #we read a list of names from a text file just for some random UID's
 names = []

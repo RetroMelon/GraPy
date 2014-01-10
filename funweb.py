@@ -1,7 +1,7 @@
 #RIGHT CLICK TO ADD A NODE
 #RIGHT CLICK AN EXISTING NODE TO REMOVE IT
 #SCROLL WHEEL WHILE ON TOP OF A NODE TO REMOVE IT, AND ADD RELATIONSHIPS BETWEEN ALL OF IT'S RELATED NODES (THAT DIDN'T ALREADY HAVE A RELATIONSHIP)
-
+#CLICK THE SCROLL WHEEL ON A NODE TO MAKE IT STATIONARY, SO IT IS UNMOVABLE BY OTHER NODES
 NUMBER_OF_NODES_TO_CONNECT_TO = 2
 
 from FDGraph import *
@@ -90,7 +90,9 @@ def mainthread():
                                         graph.addRelationship(relatednode, relatednode2)
                         graph.removeNode(n)
                     graph.unlock()
-                    
+            elif e[0] == 0 and e[1] == 2:
+                if not e[2] == None:
+                    graph.nodes[e[2]].static = not graph.nodes[e[2]].static
         time.sleep(0.2)
     print "FDGRAPHER HAS FINISHED. QUITTING MAIN THREAD..."
 
