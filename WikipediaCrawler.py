@@ -2,6 +2,9 @@
 #after it has been crawled, a few links will show up for it.
 #if you want more nodes to show up for it, click it again.
 
+
+#node data[0] is the current state of crawling. 0 - uncrawled, 1 - currently crawling, 2 - crawled
+
 from FDGraph import *
 from crawlingfunctions import *
 from threading import *
@@ -17,7 +20,7 @@ def addnewnode(graph, name, parent):
     nodeposition = (parentposition[0] + 30, parentposition[1]+30)
     n = Node.Node(name, position = nodeposition)
     n.data = [0, 0, 0]
-    n.data[0] = False
+    n.data[0] = 0
     n.data[1] = []
     n.data[2] = 0
 
@@ -34,7 +37,6 @@ def spawnfrommetadata(graph, parent):
     graph.nodes[parent].data[1] = graph.nodes[parent].data[1][1:]
 
     #checking to make sure the node doesn't already exist
-    print newnodename
     if newnodename in graph.nodes:
         spawnfrommetadata(graph, parent)
     else:
@@ -48,10 +50,12 @@ def spawnfrommetadata(graph, parent):
 #create a few new nodes from it's metadata, and remove them from the metadata
 def crawlthread(graph, page):
     print "CURRENTLY CRAWLING:", page
+    graph.nodes[page].data[0] = 1
     uniquelinks = findlinksonpage(page)
 
+    print "DONE CRAWLING", page, "WAITING FOR LOCK AVAILABILITY."
     graph.lock()
-    graph.nodes[page].data[0] = True
+    graph.nodes[page].data[0] = 2
     graph.nodes[page].data[1] = uniquelinks
     graph.nodes[page].data[2] = len(uniquelinks)
 
@@ -71,7 +75,7 @@ def customdraw(screen, node, graph, position):
 
     #if the node has not been crawled, colour it grey.
     #if the node has been crawled, colour it more red depending on how many links it still has left to pop up, and totally blue when that is none.
-    if node.data[0]: #if it has been crawled
+    if node.data[0] == 2: #if it has been crawled
         importance = float(node.data[2]) / graph.data[0] #ranges from 0 to 1. 1 being the most important
         node.radius = int(8 + 20 * importance)
         pygame.draw.circle(screen, (int(255*importance), 0, 255-int(255*importance)), position, node.radius, 0)
@@ -84,7 +88,12 @@ def customdraw(screen, node, graph, position):
         node.radius = 8
         pygame.draw.circle(screen, (100, 100, 100), position, node.radius, 0)
 
-        f = pygame.font.Font(None, 20).render(node.UID, 1, (255, 255, 255))
+        textcolour = (255, 255, 255)
+
+        if node.data[0] == 1: #if is currently being crawled, make the text yellow
+            textcolour = (255, 255, 0)
+            
+        f = pygame.font.Font(None, 20).render(node.UID, 1, textcolour)
         screen.blit(f, tupleSubtract(position, (0, -10)))#blitting the text with an x offset of 15 pixels
     
 
@@ -102,6 +111,7 @@ graph = Graph.Graph()
 graph.data = [1]
 g = Grapher.Grapher(graph = graph)
 g.setNodeDrawFunction(customdraw)
+g.size = (1200, 900)
 print "SETUP COMPLETE..."
 
 tocrawl = raw_input("\nWhich wikipedia page should we crawl?   ")
