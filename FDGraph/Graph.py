@@ -14,6 +14,8 @@ class Graph:
     nodes = {}
     relationships = {} #relationships contains 2 lists for each entry. the first is outgoing, the second is incoming
 
+    data = [] #some arbitrary data the graph can store
+
     _lock = threading.Lock()
 
     def lock(self):

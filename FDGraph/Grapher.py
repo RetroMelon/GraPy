@@ -46,6 +46,15 @@ def tupleSubtract(tuple1, tuple2):
 
 class Grapher:
 
+    
+    #Some other draw functions that we might want to use
+    #all draw functions must take a screen, node and the position of the node as a tuple after compensation for the camera's position
+    def drawwithoutcolouring(self, screen, node, graph, position):
+        pygame.draw.circle(screen, (50, 50, 255), position, node.radius, 0)
+
+        f = pygame.font.Font(None, 20).render(node.UID, 1, (255, 255, 255))
+        screen.blit(f, tupleSubtract(position, (5, 5)))#blitting the text with a 5 pixel offset
+
     #all draw functions must take a screen, node and the position of the node as a tuple after compensation for the camera's position
     def defaultnodedrawfunction(self, screen, node, graph, position):
         relationships = len(graph.relationships[node.UID][0]) + len(graph.relationships[node.UID][1])
