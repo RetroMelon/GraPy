@@ -118,7 +118,7 @@ graph = Graph.Graph()
 graph.data = [1]
 g = Grapher.Grapher(graph = graph)
 g.setNodeDrawFunction(customdraw)
-g.size = (1200, 900)
+g.size = (1000, 800)
 print "SETUP COMPLETE..."
 
 tocrawl = raw_input("\nWhich wikipedia page should we crawl?   ")

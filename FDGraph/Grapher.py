@@ -244,6 +244,7 @@ class Grapher:
         #setting up the pygame window
         pygame.init()
         screen = pygame.display.set_mode(self.size)
+        pygame.display.set_caption("GraPy")
 
         framecount = 0
         frameclock = pygame.time.Clock()
