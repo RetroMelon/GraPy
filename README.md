@@ -1,7 +1,5 @@
-GraPy
+GraPy (A simple force directed graph library for Python).
 ====================
-
-Simple Force Directed Graph Library for Python.
 
 
 GraPy is a simple library that makes it easy for users to create interactive force directed graphs. It utilises 
