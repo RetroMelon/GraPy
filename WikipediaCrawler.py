@@ -9,7 +9,9 @@ from FDGraph import *
 from crawlingfunctions import *
 from threading import *
 import pygame
+import webbrowser
 
+#if this is set to true, we will cycle through
 #takes two tuples with two values each, and returns a tuple with the value t1-t2
 def tupleSubtract(tuple1, tuple2):
     return (tuple1[0]-tuple2[0], tuple1[1]-tuple2[1])
@@ -31,6 +33,9 @@ def addnewnode(graph, name, parent):
 def spawnfrommetadata(graph, parent):
     if not len(graph.nodes[parent].data[1]) > 0:
         return
+
+    #killing some uncrawled nodes, because clearly they are not of interest
+    
 
     #taking note of the new node name before removing it from the parent node's list
     newnodename = graph.nodes[parent].data[1][0]
@@ -95,7 +100,9 @@ def customdraw(screen, node, graph, position):
             
         f = pygame.font.Font(None, 20).render(node.UID, 1, textcolour)
         screen.blit(f, tupleSubtract(position, (0, -10)))#blitting the text with an x offset of 15 pixels
-    
+
+def openarticleinbrowser(article):
+    webbrowser.open("http://en.wikipedia.org/wiki/"+article)
 
 #assumes the graph is currently locked
 def registernodeclick(graph, name):
@@ -133,6 +140,8 @@ while True:
         print e
         if e[0] == 1 and e[1] == 3 and e[2] != None:
             registernodeclick(graph, e[2])
+        elif e[0] == 1 and e[1] == 2 and e[2] != None:
+            openarticleinbrowser(e[2])
 
     graph.unlock()
     
