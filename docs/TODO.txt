@@ -9,10 +9,13 @@ CURRENT TODO'S
 	*make a proper read-me file and tutorials
 	*change methods to be absolutely clear what they do
 	*change draw function so a parameter is the camera-compensated position
-
+	*Make frametime updates optional
+	*Make mouse event print statements optional
 
 PREVIOUSLY DONE TASKS
 
+D	*Write a basic readme with install tutorial
+D	*create compatible setup.py and rename files in lib to standard lowercase python convention 
 D	*clean up event code, so that we can easily determine which events have occured
 D	*Make required variables in to properties
 D	*Change the locations of the constants variables to be in the best location
