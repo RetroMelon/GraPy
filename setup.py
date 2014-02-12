@@ -10,5 +10,5 @@ setup(name='grapy',
       author_email='2089249F@students.gla.ac.uk',
       license='MIT',
       packages=['grapy'],
-      dependencies = dependencies
+      dependencies = dependencies,
       zip_safe=False)
