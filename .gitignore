@@ -192,9 +192,9 @@ $RECYCLE.BIN/
 # Packages
 *.egg
 *.egg-info
-dist/
-build/
-eggs/
+dist/*
+build/*
+eggs/*
 parts/
 var/
 sdist/
