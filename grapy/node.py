@@ -1,5 +1,5 @@
 import math
-import Grapher
+import grapher
 #the node class is one that has a UID, and some physical properties to define its location in space.
 #the node class knows only of itself, so has no knowledge of which nodes it is connected to.
 #it calculates all forces that would act upon itself, never forces that would act upon another node.
@@ -62,7 +62,7 @@ class Node:
     #calculates the total value of the attractive force
     def _calcAttractiveForceMagnitude(self, other):
         distance = findDistance(self, other)
-        return Grapher.ATTRACTIVE_FORCE_CONSTANT * (distance - Grapher.MINIMUM_SPRING_SIZE) #we should perhaps add in a minimum string length later on.
+        return grapher.ATTRACTIVE_FORCE_CONSTANT * (distance - grapher.MINIMUM_SPRING_SIZE) #we should perhaps add in a minimum string length later on.
 
     def calculateRepulsiveForce(self, other):
         forcemagnitude = self._calcRepulsiveForceMagnitude(other)
@@ -79,7 +79,7 @@ class Node:
         distance = findDistance(self, other)
         if distance<15:
             distance = 15
-        return -Grapher.REPULSIVE_FORCE_CONSTANT*1.0*(self.charge * other.charge)/((distance*0.2)**2 + (self.charge * other.charge))
+        return -grapher.REPULSIVE_FORCE_CONSTANT*1.0*(self.charge * other.charge)/((distance*0.2)**2 + (self.charge * other.charge))
 
     def calculateAttractiveForces(self, nodeslist):
         return map(self.calculateAttractiveForce, nodeslist)
@@ -95,7 +95,7 @@ class Node:
 
     #calculates the frictional force but does not apply it
     def calculateFrictionalForce(self):
-        return (self.velocity[0]*-Grapher.FRICTION_COEFFICIENT*self.mass, self.velocity[1]*-Grapher.FRICTION_COEFFICIENT*self.mass)
+        return (self.velocity[0]*-grapher.FRICTION_COEFFICIENT*self.mass, self.velocity[1]*-grapher.FRICTION_COEFFICIENT*self.mass)
         
         
     #takes the framerate of the simulation. this should be an unchanging/static framerate, and should ideally not fluctuate
@@ -111,7 +111,7 @@ class Node:
 
             self.velocity = (self.velocity[0] + self.acceleration[0]/framerate, self.velocity[1] + self.acceleration[1]/framerate)
 
-            frictionalcoefficient = Grapher.PER_FRAME_FRICTION_COEFFICIENT
+            frictionalcoefficient = grapher.PER_FRAME_FRICTION_COEFFICIENT
             self.velocity = (self.velocity[0]*frictionalcoefficient, self.velocity[1]*frictionalcoefficient)
 
             self.position = (self.position[0] + self.velocity[0]/framerate, self.position[1] + self.velocity[1]/framerate)

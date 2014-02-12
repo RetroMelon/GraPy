@@ -1,6 +1,6 @@
-import Node
+import node
 import threading
-from Debug import *
+from debug import *
 #The graph object contains a bunch of nodes and is responsible for maintaining
 #the datastructure of nodes. and having physics act upon them
 

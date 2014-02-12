@@ -1,5 +1,3 @@
-
-
 class FramerateAverager:
 
     _numberOfFramerates = 5

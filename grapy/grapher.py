@@ -7,9 +7,9 @@
 #as of right now this class contains an infinite while loop. This may need to
 #be changed if we are to make this useful in other applications
 
-import Graph
-import Node
-import FramerateAverager
+import graph
+import node
+import framerateaverager
 import pygame
 import math
 from pygame.locals import *
@@ -126,7 +126,7 @@ class Grapher:
         self.backgrounddrawfunction = self.defaultbackgrounddrawfunction
         self.foregrounddrawfunction = self.defaultforegrounddrawfunction
 
-        self._frameaverager = FramerateAverager.FramerateAverager()
+        self._frameaverager = framerateaverager.FramerateAverager()
         _targetframerate = framerate
 
 

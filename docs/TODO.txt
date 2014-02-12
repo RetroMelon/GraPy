@@ -1,17 +1,27 @@
-D	*tidy up code
-D	*add functionality for drawing in the background, foreground, and changing the connection-drawing functions
+POSSIBLE NEW FEATURES
+
 	*add functionality for adding nodes, and automatically finding the best place in the graph to place them
+	*input box for wikipedia crawler
+
+CURRENT TODO'S
+
+	*go through the entire code, and make sure it abides by python conventions
+	*make a proper read-me file and tutorials
+	*change methods to be absolutely clear what they do
+	*change draw function so a parameter is the camera-compensated position
+
+
+PREVIOUSLY DONE TASKS
+
 D	*clean up event code, so that we can easily determine which events have occured
+D	*Make required variables in to properties
 D	*Change the locations of the constants variables to be in the best location
-X	*Make all variables in to properties
 D	*make the radius a property, and also adjust the bounding box at the same time
 D	*Fix the crashing when you remove a node you're currently grabbing
-	*go through the entire code, and make sure it abides by python conventions
 D	*add a debug function instead of just normal print statements
 D	*add ability to store data along with each node
 D	*Make a framerate timer and fix friction so it acts correctly for different frame rates
-	*make a proper read-me file and tutorials
-	*change methods to be absolutely clear what they do
 D	*change file locations so they're nicely formatted in to a library
-	*change draw function so a parameter is the camera-compensated position
 D	*fix tester.py so it doesn't leave behind a thread that chews up CPU usage when closed
+D	*tidy up code
+D	*add functionality for drawing in the background, foreground, and changing the connection-drawing functions
