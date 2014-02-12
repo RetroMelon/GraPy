@@ -14,6 +14,14 @@ alt="WIKIPEDIA BROWSER DEMO" width="400" height="329" border="10" />
 
 1. Download the [zip archive](https://github.com/RetroMelon/GraPy/archive/master.zip) or clone the repo using: ```git clone git://github.com/RetroMelon/GraPy```
 2. Open a shell in the folder containing setup.py
-3. Run the command:
-    ```python setup.py install```
+3. For a standard install, run:
 
+```python setup.py install```
+
+For an install where you can edit the code in the library easily, or remove the library easily after completion, run:
+
+```python setup.py develop```
+
+To remove the library after use, run:
+
+```python setup.py develop --uninstall```
