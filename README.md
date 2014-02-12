@@ -1,4 +1,4 @@
-GraPy (A simple force directed graph library for Python).
+GraPy
 ====================
 By [RetroMelon](https://github.com/RetroMelon)
 
