@@ -9,7 +9,7 @@ GraPy is a simple library that makes it easy for users to create interactive for
 A demo screenshot of the wikipedia browser demo:
 
 <img src="https://github.com/RetroMelon/GraPy/blob/master/docs/Wikipedia%20Browser.png?raw=true" 
-alt="WIKIPEDIA BROWSER DEMO" width="335" height="276" border="10" />
+alt="WIKIPEDIA BROWSER DEMO" width="400" height="329" border="10" />
 
 
 #Installing
