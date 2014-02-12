@@ -1,3 +1,5 @@
+.gitignore
+
 #################
 ## Eclipse
 #################
@@ -188,6 +190,7 @@ $RECYCLE.BIN/
 #############
 
 *.py[co]
+*.pyc
 
 # Packages
 *.egg
