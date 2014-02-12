@@ -8,9 +8,9 @@ GraPy is a simple library that makes it easy for users to create interactive for
 
 To run any of the demos, first either install the library using the installation guide below, or copy the ```grapy``` folder in to the ```tests``` folder. navigate to the ```tests``` folder, and click any of the .py files to run.
 
-The demo that displays most of the library's functionality is ```wikipedia_browser.py```. To use the demo, run the python file and type the name of an article you wish to search for on wikipedia (no spaces required. eg, "computing_science"). Right click a grey node to crawl the wikipedia page for the given article name. Click the node again to diplay more links for the same article. Right click any of the child nodes to search them in turn. Nodes that have been searched are coloured and sized according to how many links to other articles are present on the page. To view any of the articles in browser, middle click the node.
+The demo that displays most of the library's functionality is [```wikipedia_browser.py```](https://github.com/RetroMelon/GraPy/blob/master/tests/wikipedia_browser.py). To use the demo, run the python file and type the name of an article you wish to search for on wikipedia (no spaces required. eg, "computing_science"). Right click a grey node to crawl the wikipedia page for the given article name. Click the node again to diplay more links for the same article. Right click any of the child nodes to search them in turn. Nodes that have been searched are coloured and sized according to how many links to other articles are present on the page. To view any of the articles in browser, middle click the node.
 
-A screenshot of the wikipedia browser demo:
+A screenshot of the [```wikipedia_browser.py```](https://github.com/RetroMelon/GraPy/blob/master/tests/wikipedia_browser.py) demo:
 
 <img src="https://github.com/RetroMelon/GraPy/blob/master/docs/Wikipedia%20Browser.png?raw=true" 
 alt="WIKIPEDIA BROWSER DEMO" width="400" height="329" border="10" />
