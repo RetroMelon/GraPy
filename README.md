@@ -19,7 +19,7 @@ alt="WIKIPEDIA BROWSER DEMO" width="400" height="329" border="10" />
 #Installing
 
 ###Dependencies
-GraPy depends on the [PyGame](http://pygame.org/news.html) library. Please ensure the correct version of pygame is installed on your machine.
+GraPy depends on the [PyGame](http://pygame.org/news.html) library. 
 
 Installation of the library requires [setuptools](https://pypi.python.org/pypi/setuptools).
 
@@ -30,6 +30,8 @@ Installation of the library requires [setuptools](https://pypi.python.org/pypi/s
 3. For a standard install, run:
 
 ```python setup.py install```
+
+python will attempt to install all dependencies for GraPy including Pygame. If setup.py does not complete properly, it is likely because the system does not have all of the dependencies for Pygame. [Download](http://www.pygame.org/download.shtml) and install pygame for your target system, and reattempt installation of GraPy.
 
 For an install where you can edit the code in the library easily, or remove the library easily after completion, run:
 
