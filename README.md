@@ -12,10 +12,7 @@ A demo screenshot of the wikipedia browser demo:
 
 #Installing
 
-1. Download the [zip archive](https://github.com/RetroMelon/GraPy/archive/master.zip) or clone the repo using:
-
-```git clone git://github.com/RetroMelon/GraPy```
-
+1. Download the [zip archive](https://github.com/RetroMelon/GraPy/archive/master.zip) or clone the repo using: ```git clone git://github.com/RetroMelon/GraPy```
 2. Open a shell in the folder containing setup.py
 3. Run the command:
     ```python setup.py install```
