@@ -18,5 +18,5 @@ A demo screenshot of the wikipedia browser demo:
 2. Open a shell in the folder containing setup.py
 3. Run the command:
 
-    ```python setup.py install
+    ```python setup.py install```
 
