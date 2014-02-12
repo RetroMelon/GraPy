@@ -18,7 +18,11 @@ alt="WIKIPEDIA BROWSER DEMO" width="400" height="329" border="10" />
 
 #Installing
 
+###Dependencies
 GraPy depends on the [PyGame](http://pygame.org/news.html) library. Please ensure the correct version of pygame is installed on your machine.
+
+Installation of the library requires [setuptools](https://pypi.python.org/pypi/setuptools).
+
 ##Via Python Install
 
 1. Download the [zip archive](https://github.com/RetroMelon/GraPy/archive/master.zip) or clone the repo using: ```git clone git://github.com/RetroMelon/GraPy```
