@@ -7,6 +7,6 @@ setup(name='grapy',
       author='Joe Frew',
       author_email='2089249F@students.gla.ac.uk',
       license='MIT',
+      packages = ['grapy'],
       install_requires=['pygame>=1.9.1'],
-      dependencies = dependencies,
       zip_safe=False)
