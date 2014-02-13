@@ -2,6 +2,9 @@ POSSIBLE NEW FEATURES
 
 	*add functionality for adding nodes, and automatically finding the best place in the graph to place them
 	*input box for wikipedia crawler
+	*ability to group nodes so that in the physics engine they act as one large node to outsiders, and act upon themselves to insiders.
+	*attempt to hide concurrency from users
+	*attempt to hide the internal data structures from users
 
 CURRENT TODO'S
 
@@ -12,6 +15,7 @@ CURRENT TODO'S
 	*Make frametime updates optional
 	*Make mouse event print statements optional
 	*Make demo code readable and learnable from
+	*update all demos with new library layout
 
 PREVIOUSLY DONE TASKS
 

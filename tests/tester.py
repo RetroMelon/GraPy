@@ -1,17 +1,14 @@
-from FDGraph import *
-##import Grapher
-##import Graph
-##import Node
+import grapy
 import random
 import time
 import math
 import threading
 
-graph = Graph.Graph()
+graph = grapy.Graph()
 
 lastnodeadded = 0
 
-g = Grapher.Grapher(graph = graph)
+g = grapy.Grapher(graph = graph)
 
 #takes a graph and a grapher (g)
 def mainthread():
@@ -29,7 +26,7 @@ def mainthread():
                 else:
                     lastnodeadded = lastnodeadded + 1
                     graph.lock()
-                    graph.addNode(Node.Node(str(lastnodeadded), position = g.getRelativeMousePosition()))
+                    graph.addNode(grapy.Node(str(lastnodeadded), position = g.getRelativeMousePosition()))
                     
                     if lastnodeadded > 4:
                         numtoadd = random.randint(2, 4)
@@ -47,7 +44,7 @@ def mainthread():
     
 
 lastnodeadded = lastnodeadded + 1
-graph.addNode(Node.Node(str(lastnodeadded), position = (300, 300)))
+graph.addNode(grapy.Node(str(lastnodeadded), position = (300, 300)))
 
 g.start()
 
